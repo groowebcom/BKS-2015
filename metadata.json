@@ -1,0 +1,6 @@
+{
+  "name": "Sistem Tabungan Digital Gerai Antam BKS",
+  "description": "Aplikasi web responsif untuk pengelolaan tabungan digital, emas harian, pinjaman, dan laporan keuangan Gerai Antam BKS.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
