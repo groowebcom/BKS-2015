@@ -100,64 +100,56 @@ export default function DashboardNasabah({
     <div className="max-w-md mx-auto bg-[#F8F9FA] min-h-screen flex flex-col relative text-gray-900 shadow-2xl rounded-3xl border border-gray-100 overflow-hidden font-sans">
       
       {/* Phone Header Indicator Bar */}
-      <div className="bg-gradient-to-r from-[#cb356b] to-[#bd3f32] px-6 pt-3 pb-2 flex justify-between items-center text-white/90 text-[11px] font-bold tracking-tight shrink-0 relative z-10 border-b border-white/10">
+      <div className="bg-white px-6 pt-3 pb-2 flex justify-between items-center text-slate-500 text-[11px] font-bold tracking-tight shrink-0 relative z-10 border-b border-slate-100">
         <div className="flex items-center gap-1.5">
-          <Smartphone className="w-3.5 h-3.5 text-white" />
+          <Smartphone className="w-3.5 h-3.5 text-slate-400" />
           <span>BKS Mobile Banking</span>
         </div>
         <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></div>
-          <span className="text-[10px] font-mono text-emerald-300 font-extrabold uppercase">Sesi Aman</span>
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+          <span className="text-[10px] font-mono text-emerald-600 font-extrabold uppercase">Sesi Aman</span>
         </div>
       </div>
 
       {/* App Main Header Bar */}
-      <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] px-6 pb-9 pt-3 rounded-b-[32px] text-white shrink-0 relative overflow-hidden shadow-lg shadow-primary/15">
-        {/* Ambient Gradient Blobs for high-end glowing look */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {/* Curved radial glow */}
-          <div className="absolute -right-6 -top-6 w-36 h-36 bg-white/10 rounded-full blur-2xl"></div>
-          <div className="absolute -left-12 -bottom-12 w-48 h-48 bg-amber-400/20 rounded-full blur-3xl"></div>
-          {/* Top accent gradient line */}
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-300 via-rose-300 to-amber-400 opacity-30"></div>
-        </div>
-
+      <div className="bg-white px-6 pb-6 pt-4 text-slate-800 shrink-0 relative border-b border-slate-100 shadow-xs">
         <div className="flex justify-between items-center mb-4 relative z-10">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-white/10 rounded-full border border-white/20 flex items-center justify-center font-bold font-display text-white text-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold font-display text-slate-700 text-sm">
               {customer.name.charAt(0)}
             </div>
             <div>
-              <span className="text-[10px] text-rose-100 block font-semibold leading-none">Selamat Datang,</span>
-              <h2 className="text-sm font-bold tracking-tight leading-normal">{customer.name}</h2>
+              <span className="text-[11px] text-slate-400 block font-semibold leading-none">Selamat pagi,</span>
+              <h2 className="text-lg font-black tracking-tight text-slate-900 leading-normal mt-1">{customer.name}</h2>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-              className="p-1.5 hover:bg-white/15 rounded-lg text-white/80 transition-all"
-              title="Sembunyikan Saldo"
+              className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-all"
+              title={isBalanceVisible ? "Sembunyikan Saldo" : "Tampilkan Saldo"}
             >
-              {isBalanceVisible ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {isBalanceVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
-            <button
-              onClick={onLogout}
-              className="p-1.5 hover:bg-white/15 rounded-lg text-white/80 transition-all"
-              title="Keluar Sesi"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            
+            {/* Bell icon like in the screenshot */}
+            <div className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full relative cursor-pointer">
+              <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.3} stroke="currentColor" className="w-5 h-5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+              </svg>
+            </div>
           </div>
         </div>
 
         {/* Brand Display Card */}
-        <div className="flex justify-between items-baseline text-white/75 relative z-10">
-          <div className="text-[10px] font-mono tracking-wider bg-white/10 px-2 py-0.5 rounded border border-white/5">
-            {customer.memberNumber}
+        <div className="flex justify-between items-center text-slate-500 text-xs relative z-10 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
+          <div className="text-[10px] font-mono tracking-wider bg-white border border-slate-200 text-slate-600 px-2.5 py-0.5 rounded font-bold">
+            ID: {customer.memberNumber}
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
-            <Coins className="w-3.5 h-3.5 text-amber-300" />
+          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-amber-600">
+            <Coins className="w-3.5 h-3.5 text-amber-500" />
             Emas: Rp {currentGoldPrice.toLocaleString('id-ID')} / g
           </div>
         </div>
@@ -188,31 +180,37 @@ export default function DashboardNasabah({
         {/* 1. HOME TAB */}
         {activeTab === 'home' && (
           <>
-            {/* Primary Cash Balance Card (Styled like BRImo/Livin' top cards) */}
-            <div className="bg-gradient-to-br from-white via-slate-50/80 to-slate-100 rounded-2xl border border-slate-200/80 p-5 shadow-sm relative overflow-hidden flex flex-col justify-between h-36">
-              {/* Subtle background glow */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-rose-500/5 to-amber-500/5 rounded-full blur-xl pointer-events-none"></div>
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-full blur-xl pointer-events-none"></div>
+            {/* Primary Cash Balance Card (Styled like BRImo/Livin' top cards but with red gradient) */}
+            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] rounded-3xl p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between h-40 border border-white/10">
+              {/* Glassmorphism background glow */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+                <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-amber-400/10 rounded-full blur-3xl"></div>
+              </div>
               
-              <div className="flex justify-between items-center text-xs relative z-10">
-                <span className="text-slate-400 font-bold tracking-wide uppercase flex items-center gap-1.5">
-                  <Wallet className="w-4 h-4 text-blue-600 shrink-0" />
-                  Saldo Tabungan Tunai
+              <div className="flex justify-between items-center relative z-10">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold bg-white/15 px-2.5 py-1 rounded-lg border border-white/10 text-white flex items-center gap-1">
+                    <Wallet className="w-3.5 h-3.5 text-white" />
+                    Tabungan Tunai
+                  </span>
+                </div>
+                <span className="text-[10px] text-white/70 font-mono tracking-wider bg-white/10 px-2 py-0.5 rounded border border-white/5 uppercase font-bold">
+                  IDR
                 </span>
-                <span className="text-[9px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-extrabold">IDR</span>
               </div>
 
-              <div className="relative z-10">
-                <span className="text-[10px] text-slate-400 font-bold block uppercase leading-none">Tersedia</span>
-                <span className="text-2xl font-black font-display text-slate-900 tracking-tight block mt-1 leading-none">
+              <div className="relative z-10 mt-1">
+                <span className="text-[11px] text-white/70 font-semibold block uppercase tracking-wide">Saldo Anda:</span>
+                <span className="text-3xl font-black font-display text-white tracking-tight block mt-1 leading-none">
                   {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
                 </span>
               </div>
 
-              <div className="text-[10px] text-slate-400 font-semibold border-t border-slate-100 pt-2.5 flex justify-between relative z-10">
-                <span>Terakhir diperbarui: 12 Jul 2026</span>
-                <span className="text-blue-600 hover:underline cursor-pointer flex items-center" onClick={() => setActiveTab('money')}>
-                  Detail <ChevronRight className="w-3 h-3" />
+              <div className="text-[10px] text-white/60 pt-2 border-t border-white/10 flex justify-between items-center relative z-10">
+                <span>Pembaruan otomatis</span>
+                <span className="text-white hover:text-amber-200 transition-colors font-bold flex items-center gap-0.5 cursor-pointer" onClick={() => setActiveTab('money')}>
+                  Detail Mutasi <ChevronRight className="w-3.5 h-3.5" />
                 </span>
               </div>
             </div>
@@ -361,12 +359,14 @@ export default function DashboardNasabah({
         {/* 2. TABUNGAN UANG LEDGER TAB */}
         {activeTab === 'money' && (
           <div className="space-y-4">
-            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] text-white p-5 rounded-2xl shadow-lg relative overflow-hidden flex justify-between items-center">
-              {/* Ambient radial glow instead of waves */}
-              <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] rounded-3xl p-5 text-white shadow-lg relative overflow-hidden flex justify-between items-center border border-white/10">
+              {/* Glassmorphism background glow */}
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+              </div>
               <div className="relative z-10">
-                <span className="text-[10px] text-red-200 uppercase font-extrabold">Saldo Tabungan Tunai</span>
-                <span className="text-xl font-extrabold font-display block mt-1">
+                <span className="text-[10px] text-white/70 uppercase font-extrabold tracking-wider bg-white/10 px-2.5 py-1 rounded-lg border border-white/5">Saldo Tabungan Tunai</span>
+                <span className="text-2xl font-black font-display block mt-2 text-white">
                   {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
                 </span>
               </div>
@@ -740,13 +740,28 @@ export default function DashboardNasabah({
               </form>
             </div>
 
+            {/* Log out Account Section */}
+            <div className="bg-white rounded-2xl border border-red-100 p-5 shadow-xs flex justify-between items-center">
+              <div>
+                <h3 className="text-xs font-black text-red-600 uppercase">Keluar Aplikasi</h3>
+                <p className="text-[10px] text-gray-400">Tutup sesi aman perbankan Anda sekarang.</p>
+              </div>
+              <button
+                onClick={onLogout}
+                className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-xl text-xs font-extrabold shadow-xs transition-all flex items-center gap-1.5"
+              >
+                <LogOut className="w-4 h-4" />
+                Log out
+              </button>
+            </div>
+
           </div>
         )}
 
       </div>
 
       {/* STICKY BOTTOM NAVIGATION BAR FOR MOBILE NASABAH (UX REQUIREMENT) */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-white border-t border-gray-100 flex items-center justify-around px-2 pb-3.5 pt-1.5 shrink-0 z-10 shadow-lg">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 pb-4 pt-2 shrink-0 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
         <button
           onClick={() => setActiveTab('home')}
           className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
