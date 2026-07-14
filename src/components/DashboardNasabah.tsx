@@ -99,58 +99,67 @@ export default function DashboardNasabah({
   return (
     <div className="max-w-md mx-auto bg-[#F8F9FA] min-h-screen flex flex-col relative text-gray-900 shadow-2xl rounded-3xl border border-gray-100 overflow-hidden font-sans">
       
-      {/* Phone Header Indicator Bar */}
-      <div className="bg-white px-6 pt-3 pb-2 flex justify-between items-center text-slate-500 text-[11px] font-bold tracking-tight shrink-0 relative z-10 border-b border-slate-100">
-        <div className="flex items-center gap-1.5">
-          <Smartphone className="w-3.5 h-3.5 text-slate-400" />
-          <span>BKS Mobile Banking</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-          <span className="text-[10px] font-mono text-emerald-600 font-extrabold uppercase">Sesi Aman</span>
-        </div>
-      </div>
-
-      {/* App Main Header Bar */}
-      <div className="bg-white px-6 pb-6 pt-4 text-slate-800 shrink-0 relative border-b border-slate-100 shadow-xs">
-        <div className="flex justify-between items-center mb-4 relative z-10">
+      {/* App Main Header Bar with modern dark maroon gradient theme */}
+      <div className="bg-gradient-to-r from-[#4C0519] via-[#2F000B] to-[#1A0006] px-6 py-5 text-white shrink-0 relative border-b border-rose-950/40 shadow-md">
+        <div className="flex justify-between items-center relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-full flex items-center justify-center font-bold font-display text-slate-700 text-sm">
+            {/* Round Avatar with clean border */}
+            <div className="w-11 h-11 bg-white/10 border border-white/20 rounded-full flex items-center justify-center font-bold font-display text-white text-base shadow-xs shrink-0">
               {customer.name.charAt(0)}
             </div>
-            <div>
-              <span className="text-[11px] text-slate-400 block font-semibold leading-none">Selamat pagi,</span>
-              <h2 className="text-lg font-black tracking-tight text-slate-900 leading-normal mt-1">{customer.name}</h2>
+            <div className="text-left">
+              <h2 className="text-base font-extrabold tracking-tight text-white leading-tight">{customer.name}</h2>
+              <span className="text-[11px] text-rose-200/80 font-bold tracking-wide flex items-center gap-0.5 mt-0.5 cursor-pointer hover:text-white transition-all select-none">
+                ID: {customer.memberNumber} <ChevronRight className="w-3.5 h-3.5 opacity-80" />
+              </span>
             </div>
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
+            {/* Eye toggle button */}
             <button
               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-              className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-all"
+              className="p-1.5 hover:bg-white/10 rounded-full text-rose-200/90 hover:text-white transition-all"
               title={isBalanceVisible ? "Sembunyikan Saldo" : "Tampilkan Saldo"}
             >
               {isBalanceVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
             
-            {/* Bell icon like in the screenshot */}
-            <div className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full relative cursor-pointer">
-              <div className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white"></div>
+            {/* Settings/Gear Icon */}
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`p-1.5 rounded-full transition-all ${
+                activeTab === 'profile' 
+                  ? 'bg-white/15 text-white' 
+                  : 'text-rose-200/90 hover:text-white hover:bg-white/10'
+              }`}
+              title="Profil & Pengaturan"
+            >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.3} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.936 6.936 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
               </svg>
-            </div>
+            </button>
+
+            {/* Logout button */}
+            <button
+              onClick={onLogout}
+              className="p-1.5 text-rose-200/90 hover:text-white hover:bg-white/10 rounded-full transition-all"
+              title="Keluar"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
 
-        {/* Brand Display Card */}
-        <div className="flex justify-between items-center text-slate-500 text-xs relative z-10 bg-slate-50 px-3 py-2 rounded-xl border border-slate-100">
-          <div className="text-[10px] font-mono tracking-wider bg-white border border-slate-200 text-slate-600 px-2.5 py-0.5 rounded font-bold">
-            ID: {customer.memberNumber}
+        {/* Integrated Sub-Header display for Gold price */}
+        <div className="flex justify-between items-center text-xs mt-4 pt-3.5 border-t border-white/10 relative z-10">
+          <div className="text-[10px] font-mono tracking-wider bg-white/10 border border-white/10 text-rose-100 px-2.5 py-0.5 rounded font-bold">
+            Nasabah ID: {customer.memberNumber}
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 text-amber-600">
-            <Coins className="w-3.5 h-3.5 text-amber-500" />
-            Emas: Rp {currentGoldPrice.toLocaleString('id-ID')} / g
+          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-rose-100/90">
+            <Coins className="w-3.5 h-3.5 text-amber-400" />
+            Harga Emas: Rp {currentGoldPrice.toLocaleString('id-ID')} / g
           </div>
         </div>
       </div>
@@ -183,7 +192,7 @@ export default function DashboardNasabah({
             {/* Primary Cash Balance Card (Money Card with money-card.png background) */}
             <div 
               className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
-              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/money-card.png')` }}
+              style={{ backgroundImage: `url('https://grooweb.com/wp-content/uploads/2026/07/money-card.png')` }}
             >
               {/* Top Row: Empty Left for pre-printed Logo, Right has IDR tag */}
               <div className="flex justify-end items-start relative z-10">
@@ -198,7 +207,7 @@ export default function DashboardNasabah({
                   BKS UTAMA
                 </span>
                 <span className="text-[11px] font-mono font-bold tracking-widest text-slate-200 mt-1.5 leading-none">
-                  BKS-2015-••••-{customer.memberNumber.slice(-4) || '2015'}
+                  {customer.memberNumber}
                 </span>
                 <span className="text-[9.5px] text-emerald-300 font-extrabold tracking-wider mt-1.5 uppercase flex items-center gap-1 leading-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -207,18 +216,21 @@ export default function DashboardNasabah({
               </div>
 
               {/* Bottom Row: Divider & Balance */}
-              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[90%]">
+              <div className="mt-auto space-y-2 relative z-10 text-left w-full">
                 <div className="h-[1px] bg-white/10 w-full"></div>
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
                     <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider leading-none">Saldo Uang</span>
-                    <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tight mt-1 leading-none">
-                      {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
-                    </span>
+                    <div className="flex flex-col mt-1">
+                      <span className="text-[10px] font-bold text-slate-300 leading-none">Rp</span>
+                      <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight mt-1 leading-none">
+                        {isBalanceVisible ? moneyBalance.toLocaleString('id-ID') : '••••••••'}
+                      </span>
+                    </div>
                   </div>
                   <span 
                     onClick={() => setActiveTab('money')}
-                    className="text-[9.5px] font-extrabold text-amber-200 hover:text-amber-100 transition-colors flex items-center gap-0.5 cursor-pointer pb-0.5"
+                    className="text-[9.5px] font-extrabold text-white hover:text-slate-200 transition-colors flex items-center gap-0.5 cursor-pointer pb-0.5 select-none"
                   >
                     Detail Mutasi <ChevronRight className="w-3.5 h-3.5" />
                   </span>
@@ -229,12 +241,12 @@ export default function DashboardNasabah({
             {/* Gold Balance Card (Gold Card with gold-card.png background and personalized Name & ID) */}
             <div 
               className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
-              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/gold-card.png')` }}
+              style={{ backgroundImage: `url('https://grooweb.com/wp-content/uploads/2026/07/gold-card.png')` }}
             >
               {/* Top Row: Empty Left for pre-printed Logo, Right has Antam tag */}
               <div className="flex justify-end items-start relative z-10">
                 <span className="text-[8px] text-amber-300 bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
-                  24K ANTAM
+                  ANTAM
                 </span>
               </div>
 
@@ -292,27 +304,59 @@ export default function DashboardNasabah({
 
             {/* Quick Navigation Panel */}
             <div className="grid grid-cols-4 gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-              <button onClick={() => setActiveTab('money')} className="flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center shadow-xs">
-                  <Wallet className="w-5 h-5" />
+              <button 
+                onClick={() => setActiveTab('money')} 
+                className="flex flex-col items-center gap-1.5 cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-rose-50 hover:bg-rose-100 border border-rose-100/50 rounded-full flex items-center justify-center shadow-xs transition-all duration-200 group-hover:scale-105">
+                  <img 
+                    src="https://grooweb.com/wp-content/uploads/2026/07/icon-tabungan-uang.png" 
+                    alt="Tabungan" 
+                    className="w-7 h-7 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700">Tabungan</span>
               </button>
-              <button onClick={() => setActiveTab('gold')} className="flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center shadow-xs">
-                  <Coins className="w-5 h-5 text-amber-500" />
+              <button 
+                onClick={() => setActiveTab('gold')} 
+                className="flex flex-col items-center gap-1.5 cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-rose-50 hover:bg-rose-100 border border-rose-100/50 rounded-full flex items-center justify-center shadow-xs transition-all duration-200 group-hover:scale-105">
+                  <img 
+                    src="https://grooweb.com/wp-content/uploads/2026/07/icon-tabungan-emas.png" 
+                    alt="Emas" 
+                    className="w-7 h-7 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700">Tab. Emas</span>
               </button>
-              <button onClick={() => setActiveTab('loans')} className="flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center shadow-xs">
-                  <Percent className="w-5 h-5 text-indigo-500" />
+              <button 
+                onClick={() => setActiveTab('loans')} 
+                className="flex flex-col items-center gap-1.5 cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-rose-50 hover:bg-rose-100 border border-rose-100/50 rounded-full flex items-center justify-center shadow-xs transition-all duration-200 group-hover:scale-105">
+                  <img 
+                    src="https://grooweb.com/wp-content/uploads/2026/07/icon-pinjaman.png" 
+                    alt="Pinjaman" 
+                    className="w-7 h-7 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700">Pinjaman</span>
               </button>
-              <button onClick={() => setActiveTab('profile')} className="flex flex-col items-center gap-1.5">
-                <div className="w-10 h-10 bg-slate-50 text-slate-700 rounded-xl flex items-center justify-center shadow-xs">
-                  <User className="w-5 h-5 text-slate-600" />
+              <button 
+                onClick={() => setActiveTab('profile')} 
+                className="flex flex-col items-center gap-1.5 cursor-pointer group"
+              >
+                <div className="w-12 h-12 bg-rose-50 hover:bg-rose-100 border border-rose-100/50 rounded-full flex items-center justify-center shadow-xs transition-all duration-200 group-hover:scale-105">
+                  <img 
+                    src="https://grooweb.com/wp-content/uploads/2026/07/icon-profile.png" 
+                    alt="Profil" 
+                    className="w-7 h-7 object-contain"
+                    referrerPolicy="no-referrer"
+                  />
                 </div>
                 <span className="text-[10px] font-bold text-slate-700">Profil Saya</span>
               </button>
@@ -375,7 +419,7 @@ export default function DashboardNasabah({
           <div className="space-y-4">
             <div 
               className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
-              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/money-card.png')` }}
+              style={{ backgroundImage: `url('https://grooweb.com/wp-content/uploads/2026/07/money-card.png')` }}
             >
               {/* Top Row: Empty Left for pre-printed Logo, Right has IDR tag */}
               <div className="flex justify-end items-start relative z-10">
@@ -390,7 +434,7 @@ export default function DashboardNasabah({
                   BKS UTAMA
                 </span>
                 <span className="text-[11px] font-mono font-bold tracking-widest text-slate-200 mt-1.5 leading-none">
-                  BKS-2015-••••-{customer.memberNumber.slice(-4) || '2015'}
+                  {customer.memberNumber}
                 </span>
                 <span className="text-[9.5px] text-emerald-300 font-extrabold tracking-wider mt-1.5 uppercase flex items-center gap-1 leading-none">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -399,14 +443,17 @@ export default function DashboardNasabah({
               </div>
 
               {/* Bottom Row: Divider & Balance */}
-              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[90%]">
+              <div className="mt-auto space-y-2 relative z-10 text-left w-full">
                 <div className="h-[1px] bg-white/10 w-full"></div>
                 <div className="flex justify-between items-end">
                   <div className="flex flex-col">
                     <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider leading-none">Saldo Uang</span>
-                    <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tight mt-1 leading-none">
-                      {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
-                    </span>
+                    <div className="flex flex-col mt-1">
+                      <span className="text-[10px] font-bold text-slate-300 leading-none">Rp</span>
+                      <span className="text-xl sm:text-2xl font-black font-display text-white tracking-tight mt-1 leading-none">
+                        {isBalanceVisible ? moneyBalance.toLocaleString('id-ID') : '••••••••'}
+                      </span>
+                    </div>
                   </div>
                   <span className="text-[8px] text-slate-300 font-bold uppercase tracking-widest font-mono select-none">
                     Rupiah Indonesia
@@ -464,12 +511,12 @@ export default function DashboardNasabah({
             
             <div 
               className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
-              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/gold-card.png')` }}
+              style={{ backgroundImage: `url('https://grooweb.com/wp-content/uploads/2026/07/gold-card.png')` }}
             >
               {/* Top Row: Empty Left for pre-printed Logo, Right has Antam tag */}
               <div className="flex justify-end items-start relative z-10">
                 <span className="text-[8px] text-amber-300 bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
-                  24K ANTAM
+                  ANTAM
                 </span>
               </div>
 
@@ -810,55 +857,135 @@ export default function DashboardNasabah({
       </div>
 
       {/* STICKY BOTTOM NAVIGATION BAR FOR MOBILE NASABAH (UX REQUIREMENT) */}
-      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-20 bg-white border-t border-slate-100 flex items-center justify-around px-2 pb-4 pt-2 shrink-0 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]">
+      <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto h-22 bg-white border-t border-slate-100 flex items-center justify-around px-2 pb-5 pt-2.5 shrink-0 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+        {/* Beranda Button */}
         <button
           onClick={() => setActiveTab('home')}
-          className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
-            activeTab === 'home' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-          }`}
+          className="flex flex-col items-center flex-1 cursor-pointer select-none group"
         >
-          <Landmark className="w-5 h-5 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-tight">Beranda</span>
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'home' 
+              ? 'bg-rose-100 border border-rose-200 scale-105 shadow-xs' 
+              : 'bg-rose-50/50 border border-rose-100/30 group-hover:bg-rose-50/90'
+          }`}>
+            <img 
+              src="https://grooweb.com/wp-content/uploads/2026/07/beranda.png" 
+              alt="Beranda" 
+              className={`w-6 h-6 object-contain transition-all ${
+                activeTab === 'home' ? 'grayscale-0 opacity-100' : 'grayscale opacity-40 group-hover:opacity-60'
+              }`}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className={`text-[9.5px] mt-1 tracking-tight transition-all ${
+            activeTab === 'home' ? 'font-extrabold text-rose-700' : 'font-medium text-slate-400'
+          }`}>
+            Beranda
+          </span>
         </button>
 
+        {/* Tabungan Uang Button */}
         <button
           onClick={() => setActiveTab('money')}
-          className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
-            activeTab === 'money' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-          }`}
+          className="flex flex-col items-center flex-1 cursor-pointer select-none group"
         >
-          <Wallet className="w-5 h-5 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-tight">Tabungan</span>
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'money' 
+              ? 'bg-rose-100 border border-rose-200 scale-105 shadow-xs' 
+              : 'bg-rose-50/50 border border-rose-100/30 group-hover:bg-rose-50/90'
+          }`}>
+            <img 
+              src="https://grooweb.com/wp-content/uploads/2026/07/icon-tabungan-uang.png" 
+              alt="Tabungan" 
+              className={`w-6 h-6 object-contain transition-all ${
+                activeTab === 'money' ? 'grayscale-0 opacity-100' : 'grayscale opacity-40 group-hover:opacity-60'
+              }`}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className={`text-[9.5px] mt-1 tracking-tight transition-all ${
+            activeTab === 'money' ? 'font-extrabold text-rose-700' : 'font-medium text-slate-400'
+          }`}>
+            Tabungan
+          </span>
         </button>
 
+        {/* Tabungan Emas Button */}
         <button
           onClick={() => setActiveTab('gold')}
-          className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
-            activeTab === 'gold' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-          }`}
+          className="flex flex-col items-center flex-1 cursor-pointer select-none group"
         >
-          <Coins className="w-5 h-5 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-tight">Emas</span>
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'gold' 
+              ? 'bg-rose-100 border border-rose-200 scale-105 shadow-xs' 
+              : 'bg-rose-50/50 border border-rose-100/30 group-hover:bg-rose-50/90'
+          }`}>
+            <img 
+              src="https://grooweb.com/wp-content/uploads/2026/07/icon-tabungan-emas.png" 
+              alt="Emas" 
+              className={`w-6 h-6 object-contain transition-all ${
+                activeTab === 'gold' ? 'grayscale-0 opacity-100' : 'grayscale opacity-40 group-hover:opacity-60'
+              }`}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className={`text-[9.5px] mt-1 tracking-tight transition-all ${
+            activeTab === 'gold' ? 'font-extrabold text-rose-700' : 'font-medium text-slate-400'
+          }`}>
+            Emas
+          </span>
         </button>
 
+        {/* Pinjaman Button */}
         <button
           onClick={() => setActiveTab('loans')}
-          className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
-            activeTab === 'loans' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-          }`}
+          className="flex flex-col items-center flex-1 cursor-pointer select-none group"
         >
-          <Percent className="w-5 h-5 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-tight">Kredit</span>
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'loans' 
+              ? 'bg-rose-100 border border-rose-200 scale-105 shadow-xs' 
+              : 'bg-rose-50/50 border border-rose-100/30 group-hover:bg-rose-50/90'
+          }`}>
+            <img 
+              src="https://grooweb.com/wp-content/uploads/2026/07/icon-pinjaman.png" 
+              alt="Pinjaman" 
+              className={`w-6 h-6 object-contain transition-all ${
+                activeTab === 'loans' ? 'grayscale-0 opacity-100' : 'grayscale opacity-45 group-hover:opacity-65'
+              }`}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className={`text-[9.5px] mt-1 tracking-tight transition-all ${
+            activeTab === 'loans' ? 'font-extrabold text-rose-700' : 'font-medium text-slate-400'
+          }`}>
+            Kredit
+          </span>
         </button>
 
+        {/* Profil Button */}
         <button
           onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-1 px-3.5 py-1 rounded-xl transition-all ${
-            activeTab === 'profile' ? 'text-primary' : 'text-gray-400 hover:text-gray-600'
-          }`}
+          className="flex flex-col items-center flex-1 cursor-pointer select-none group"
         >
-          <User className="w-5 h-5 shrink-0" />
-          <span className="text-[9px] font-black uppercase tracking-tight">Profil</span>
+          <div className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+            activeTab === 'profile' 
+              ? 'bg-rose-100 border border-rose-200 scale-105 shadow-xs' 
+              : 'bg-rose-50/50 border border-rose-100/30 group-hover:bg-rose-50/90'
+          }`}>
+            <img 
+              src="https://grooweb.com/wp-content/uploads/2026/07/icon-profile.png" 
+              alt="Profil" 
+              className={`w-6 h-6 object-contain transition-all ${
+                activeTab === 'profile' ? 'grayscale-0 opacity-100' : 'grayscale opacity-40 group-hover:opacity-60'
+              }`}
+              referrerPolicy="no-referrer"
+            />
+          </div>
+          <span className={`text-[9.5px] mt-1 tracking-tight transition-all ${
+            activeTab === 'profile' ? 'font-extrabold text-rose-700' : 'font-medium text-slate-400'
+          }`}>
+            Profil
+          </span>
         </button>
       </div>
 

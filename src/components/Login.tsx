@@ -4,7 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { ShieldCheck, User as UserIcon, Lock, Landmark, Info, KeyRound } from 'lucide-react';
+import { ShieldCheck, User as UserIcon, Lock, Landmark, Info, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { UserRole, Customer } from '../types';
 import { supabase } from '../lib/supabase';
 import { Logo } from './Logo';
@@ -25,6 +25,7 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const performLogin = async (id: string, pass: string, tab: 'customer' | 'staff') => {
     setError('');
@@ -260,15 +261,6 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
         <div className="absolute -bottom-20 left-10 w-96 h-96 rounded-full bg-red-100/40 blur-3xl" />
       </div>
 
-      {/* Header Brand */}
-      <div className="w-full py-4 px-6 flex items-center justify-between border-b border-gray-100 bg-white/60 backdrop-blur-md relative z-10">
-        <Logo size="sm" />
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 border border-rose-200 text-[11px] text-rose-700 font-semibold shadow-sm">
-          <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></div>
-          Lokal Aktif
-        </div>
-      </div>
-
       {/* Main Container */}
       <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-8 relative z-10">
         <div className="w-full max-w-md">
@@ -357,7 +349,7 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                   </label>
                   {activeTab === 'customer' && (
                     <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-medium">
-                      Password awal = DDMMYYYY
+                      Password awal = Tgl Lahir (19021978)
                     </span>
                   )}
                 </div>
@@ -366,13 +358,21 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                     <Lock className="w-4 h-4" />
                   </div>
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     id="login-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Masukkan password Anda"
-                    className="w-full pl-10 pr-4 py-3 text-sm bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-gray-900 placeholder:text-gray-400"
+                    className="w-full pl-10 pr-12 py-3 text-sm bg-gray-50/50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-gray-900 placeholder:text-gray-400"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 transition-all cursor-pointer"
+                    title={showPassword ? 'Sembunyikan Password' : 'Tampilkan Password'}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -383,12 +383,9 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                 className={`w-full py-3.5 rounded-xl font-bold text-sm tracking-wide transition-all shadow-md mt-2 flex items-center justify-center gap-2 active:scale-[0.98] ${
                   loading
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
-                    : activeTab === 'customer'
-                    ? 'bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white shadow-primary/20 hover:shadow-lg'
-                    : 'bg-gradient-to-r from-amber-500 to-gold hover:from-gold hover:to-amber-500 text-gray-900 shadow-amber-500/10 hover:shadow-lg'
+                    : 'bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white shadow-primary/20 hover:shadow-lg'
                 }`}
               >
-                <KeyRound className="w-4 h-4" />
                 {loading ? 'MEMPROSES AUTH...' : 'MASUK KE SISTEM'}
               </button>
             </form>
