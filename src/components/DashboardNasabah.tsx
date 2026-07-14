@@ -180,78 +180,92 @@ export default function DashboardNasabah({
         {/* 1. HOME TAB */}
         {activeTab === 'home' && (
           <>
-            {/* Primary Cash Balance Card (Styled like BRImo/Livin' top cards but with red gradient) */}
-            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] rounded-3xl p-5 text-white shadow-lg relative overflow-hidden flex flex-col justify-between h-40 border border-white/10">
-              {/* Glassmorphism background glow */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-                <div className="absolute -left-10 -bottom-10 w-36 h-36 bg-amber-400/10 rounded-full blur-3xl"></div>
-              </div>
-              
-              <div className="flex justify-between items-center relative z-10">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] uppercase tracking-wider font-extrabold bg-white/15 px-2.5 py-1 rounded-lg border border-white/10 text-white flex items-center gap-1">
-                    <Wallet className="w-3.5 h-3.5 text-white" />
-                    Tabungan Tunai
-                  </span>
-                </div>
-                <span className="text-[10px] text-white/70 font-mono tracking-wider bg-white/10 px-2 py-0.5 rounded border border-white/5 uppercase font-bold">
+            {/* Primary Cash Balance Card (Money Card with money-card.png background) */}
+            <div 
+              className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
+              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/money-card.png')` }}
+            >
+              {/* Top Row: Empty Left for pre-printed Logo, Right has IDR tag */}
+              <div className="flex justify-end items-start relative z-10">
+                <span className="text-[8px] text-white/90 bg-white/10 border border-white/10 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
                   IDR
                 </span>
               </div>
 
-              <div className="relative z-10 mt-1">
-                <span className="text-[11px] text-white/70 font-semibold block uppercase tracking-wide">Saldo Anda:</span>
-                <span className="text-3xl font-black font-display text-white tracking-tight block mt-1 leading-none">
-                  {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
+              {/* Middle Row: Custom Card Credentials & Active Status */}
+              <div className="flex-1 flex flex-col justify-center mt-2 pl-1 text-left relative z-10 max-w-[60%]">
+                <span className="text-[9px] font-extrabold text-amber-300/90 bg-white/5 border border-white/10 px-2 py-0.5 rounded w-max tracking-wider uppercase leading-none">
+                  BKS UTAMA
+                </span>
+                <span className="text-[11px] font-mono font-bold tracking-widest text-slate-200 mt-1.5 leading-none">
+                  BKS-2015-••••-{customer.memberNumber.slice(-4) || '2015'}
+                </span>
+                <span className="text-[9.5px] text-emerald-300 font-extrabold tracking-wider mt-1.5 uppercase flex items-center gap-1 leading-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Status: Aktif
                 </span>
               </div>
 
-              <div className="text-[10px] text-white/60 pt-2 border-t border-white/10 flex justify-between items-center relative z-10">
-                <span>Pembaruan otomatis</span>
-                <span className="text-white hover:text-amber-200 transition-colors font-bold flex items-center gap-0.5 cursor-pointer" onClick={() => setActiveTab('money')}>
-                  Detail Mutasi <ChevronRight className="w-3.5 h-3.5" />
-                </span>
+              {/* Bottom Row: Divider & Balance */}
+              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[90%]">
+                <div className="h-[1px] bg-white/10 w-full"></div>
+                <div className="flex justify-between items-end">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider leading-none">Saldo Uang</span>
+                    <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tight mt-1 leading-none">
+                      {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
+                    </span>
+                  </div>
+                  <span 
+                    onClick={() => setActiveTab('money')}
+                    className="text-[9.5px] font-extrabold text-amber-200 hover:text-amber-100 transition-colors flex items-center gap-0.5 cursor-pointer pb-0.5"
+                  >
+                    Detail Mutasi <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Gold Balance Card (Antam Gold theme styling) */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 rounded-2xl p-5 text-white shadow-xl relative overflow-hidden flex flex-col justify-between h-40 border border-slate-700/30">
-              {/* Modern ambient gold backlighting gradient */}
-              <div className="absolute -right-10 -bottom-10 w-44 h-44 bg-gradient-to-br from-amber-500/15 to-transparent rounded-full blur-2xl pointer-events-none"></div>
-              {/* Luxury Gold Mesh */}
-              <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-radial from-gold/15 to-transparent blur-xl pointer-events-none"></div>
-              
-              <div className="flex justify-between items-center text-xs relative z-10">
-                <span className="text-amber-200/80 font-bold tracking-wide uppercase flex items-center gap-1.5">
-                  <Coins className="w-4 h-4 text-amber-500 shrink-0" />
-                  Tabungan Emas Fisik
-                </span>
-                <span className="text-[9px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded font-extrabold border border-amber-500/20">
-                  ANTAM
+            {/* Gold Balance Card (Gold Card with gold-card.png background and personalized Name & ID) */}
+            <div 
+              className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
+              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/gold-card.png')` }}
+            >
+              {/* Top Row: Empty Left for pre-printed Logo, Right has Antam tag */}
+              <div className="flex justify-end items-start relative z-10">
+                <span className="text-[8px] text-amber-300 bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
+                  24K ANTAM
                 </span>
               </div>
 
-              <div className="relative z-10">
-                <span className="text-[10px] text-amber-200/50 font-bold block uppercase leading-none">Berat Bersih</span>
-                <div className="flex items-baseline gap-1 mt-1 leading-none">
-                  <span className="text-2xl font-black font-display text-amber-400">
-                    {isBalanceVisible ? goldBalance.toFixed(4) : '••••'}
-                  </span>
-                  <span className="text-xs font-bold text-gray-400">gram</span>
-                </div>
+              {/* Middle Row: Member Personalized Info (Psychological ownership!) */}
+              <div className="flex-1 flex flex-col justify-center mt-2 pl-1 text-left relative z-10 max-w-[55%]">
+                <span className="text-[9px] font-extrabold text-[#D4AF37] bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded w-max tracking-wider uppercase leading-none">
+                  QUARTZ
+                </span>
+                <span className="text-[11px] font-mono font-bold tracking-widest text-slate-100 mt-1.5 leading-none">
+                  {customer.memberNumber}
+                </span>
+                <span className="text-sm sm:text-base font-black tracking-tight text-white uppercase mt-1 leading-none block truncate">
+                  {customer.name}
+                </span>
               </div>
 
-              <div className="border-t border-white/5 pt-2.5 flex justify-between items-center relative z-10">
-                <div>
-                  <span className="text-[9px] text-gray-500 font-bold block uppercase leading-none">Nilai Kurs Rupiah Aktif</span>
-                  <span className="text-xs font-extrabold text-amber-400 mt-1 block">
-                    {isBalanceVisible ? formatIDR(goldValueRupiah) : '••••••••'}
+              {/* Bottom Row: Divider & Gold Balance / Estimates on the left, empty on right to prevent logo overlap */}
+              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[55%]">
+                <div className="h-[1px] bg-white/10 w-full"></div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-amber-200/50 font-bold uppercase tracking-wider leading-none">Saldo Emas</span>
+                  <div className="flex items-baseline gap-1 mt-1 leading-none">
+                    <span className="text-xl sm:text-2xl font-black font-display text-amber-300">
+                      {isBalanceVisible ? goldBalance.toFixed(4) : '••••'}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-300">gram</span>
+                  </div>
+                  <span className="text-[9.5px] text-amber-300/80 font-bold mt-1 block">
+                    Est: {isBalanceVisible ? formatIDR(goldValueRupiah) : '••••••••'}
                   </span>
                 </div>
-                <span className="text-amber-400 text-xs font-bold hover:underline cursor-pointer flex items-center shrink-0" onClick={() => setActiveTab('gold')}>
-                  Kurs <ChevronRight className="w-3.5 h-3.5" />
-                </span>
               </div>
             </div>
 
@@ -359,18 +373,46 @@ export default function DashboardNasabah({
         {/* 2. TABUNGAN UANG LEDGER TAB */}
         {activeTab === 'money' && (
           <div className="space-y-4">
-            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] rounded-3xl p-5 text-white shadow-lg relative overflow-hidden flex justify-between items-center border border-white/10">
-              {/* Glassmorphism background glow */}
-              <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-              </div>
-              <div className="relative z-10">
-                <span className="text-[10px] text-white/70 uppercase font-extrabold tracking-wider bg-white/10 px-2.5 py-1 rounded-lg border border-white/5">Saldo Tabungan Tunai</span>
-                <span className="text-2xl font-black font-display block mt-2 text-white">
-                  {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
+            <div 
+              className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
+              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/money-card.png')` }}
+            >
+              {/* Top Row: Empty Left for pre-printed Logo, Right has IDR tag */}
+              <div className="flex justify-end items-start relative z-10">
+                <span className="text-[8px] text-white/90 bg-white/10 border border-white/10 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
+                  IDR
                 </span>
               </div>
-              <Wallet className="w-8 h-8 text-white/30 shrink-0 relative z-10" />
+
+              {/* Middle Row: Custom Card Credentials & Active Status */}
+              <div className="flex-1 flex flex-col justify-center mt-2 pl-1 text-left relative z-10 max-w-[60%]">
+                <span className="text-[9px] font-extrabold text-amber-300/90 bg-white/5 border border-white/10 px-2 py-0.5 rounded w-max tracking-wider uppercase leading-none">
+                  BKS UTAMA
+                </span>
+                <span className="text-[11px] font-mono font-bold tracking-widest text-slate-200 mt-1.5 leading-none">
+                  BKS-2015-••••-{customer.memberNumber.slice(-4) || '2015'}
+                </span>
+                <span className="text-[9.5px] text-emerald-300 font-extrabold tracking-wider mt-1.5 uppercase flex items-center gap-1 leading-none">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Status: Aktif
+                </span>
+              </div>
+
+              {/* Bottom Row: Divider & Balance */}
+              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[90%]">
+                <div className="h-[1px] bg-white/10 w-full"></div>
+                <div className="flex justify-between items-end">
+                  <div className="flex flex-col">
+                    <span className="text-[9px] text-white/50 font-bold uppercase tracking-wider leading-none">Saldo Uang</span>
+                    <span className="text-2xl sm:text-3xl font-black font-display text-white tracking-tight mt-1 leading-none">
+                      {isBalanceVisible ? formatIDR(moneyBalance) : '••••••••'}
+                    </span>
+                  </div>
+                  <span className="text-[8px] text-slate-300 font-bold uppercase tracking-widest font-mono select-none">
+                    Rupiah Indonesia
+                  </span>
+                </div>
+              </div>
             </div>
 
             <div className="bg-white rounded-2xl border border-gray-100 p-4 shadow-xs space-y-3">
@@ -420,36 +462,43 @@ export default function DashboardNasabah({
         {activeTab === 'gold' && (
           <div className="space-y-4">
             
-            {/* Gold Assets Cards */}
-            <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-950 text-white p-5 rounded-2xl shadow-lg space-y-4 relative overflow-hidden border border-slate-700/30">
-              {/* Subtle gold glow instead of waves */}
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-amber-500/20 to-transparent rounded-full blur-2xl pointer-events-none"></div>
-              <div className="absolute right-0 bottom-0 top-0 w-1/4 bg-radial from-gold/10 to-transparent blur-xl pointer-events-none"></div>
-              
-              <div className="flex justify-between items-start relative z-10">
-                <div>
-                  <span className="text-[10px] text-amber-200/60 uppercase font-extrabold">Saldo Emas Fisik</span>
-                  <div className="flex items-baseline gap-1 mt-1 leading-none">
-                    <span className="text-2xl font-black font-display text-gold">
-                      {isBalanceVisible ? goldBalance.toFixed(4) : '••••'}
-                    </span>
-                    <span className="text-xs font-bold text-gray-400">gram</span>
-                  </div>
-                </div>
-                <Coins className="w-8 h-8 text-gold/30 shrink-0" />
+            <div 
+              className="w-full max-w-md mx-auto aspect-[1.586/1] rounded-[20px] relative overflow-hidden text-white shadow-lg border border-white/5 flex flex-col justify-between p-5 bg-cover bg-center transition-all hover:shadow-xl select-none"
+              style={{ backgroundImage: `url('https://raw.githubusercontent.com/groowebcom/BKS-2015/refs/heads/main/assets/.aistudio/gold-card.png')` }}
+            >
+              {/* Top Row: Empty Left for pre-printed Logo, Right has Antam tag */}
+              <div className="flex justify-end items-start relative z-10">
+                <span className="text-[8px] text-amber-300 bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded font-extrabold tracking-widest font-mono uppercase">
+                  24K ANTAM
+                </span>
               </div>
 
-              <div className="border-t border-white/10 pt-3 flex justify-between items-center text-xs relative z-10">
-                <div>
-                  <span className="text-[9px] text-gray-500 font-bold block uppercase leading-none">Kurs Antam Hari Ini</span>
-                  <span className="text-xs font-black text-amber-400 leading-none mt-1 block">
-                    Rp {currentGoldPrice.toLocaleString('id-ID')} / g
-                  </span>
-                </div>
-                <div className="text-right">
-                  <span className="text-[9px] text-gray-500 font-bold block uppercase leading-none">Estimasi IDR Aktif</span>
-                  <span className="text-xs font-black text-white leading-none mt-1 block">
-                    {isBalanceVisible ? formatIDR(goldValueRupiah) : '••••••••'}
+              {/* Middle Row: Member Personalized Info (Psychological ownership!) */}
+              <div className="flex-1 flex flex-col justify-center mt-2 pl-1 text-left relative z-10 max-w-[55%]">
+                <span className="text-[9px] font-extrabold text-[#D4AF37] bg-amber-950/40 border border-[#856314]/30 px-2 py-0.5 rounded w-max tracking-wider uppercase leading-none">
+                  QUARTZ
+                </span>
+                <span className="text-[11px] font-mono font-bold tracking-widest text-slate-100 mt-1.5 leading-none">
+                  {customer.memberNumber}
+                </span>
+                <span className="text-sm sm:text-base font-black tracking-tight text-white uppercase mt-1 leading-none block truncate">
+                  {customer.name}
+                </span>
+              </div>
+
+              {/* Bottom Row: Divider & Gold Balance / Estimates on the left, empty on right to prevent logo overlap */}
+              <div className="mt-auto space-y-2 relative z-10 text-left max-w-[55%]">
+                <div className="h-[1px] bg-white/10 w-full"></div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] text-amber-200/50 font-bold uppercase tracking-wider leading-none">Saldo Emas</span>
+                  <div className="flex items-baseline gap-1 mt-1 leading-none">
+                    <span className="text-xl sm:text-2xl font-black font-display text-amber-300">
+                      {isBalanceVisible ? goldBalance.toFixed(4) : '••••'}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-300">gram</span>
+                  </div>
+                  <span className="text-[9.5px] text-amber-300/80 font-bold mt-1 block">
+                    Est: {isBalanceVisible ? formatIDR(goldValueRupiah) : '••••••••'}
                   </span>
                 </div>
               </div>
@@ -602,7 +651,7 @@ export default function DashboardNasabah({
           <div className="space-y-4">
             
             {/* LUXURY GOLD-TEXTURED BKS DIGITAL MEMBERSHIP CARD (CRAFTSMANSHIP POINT) */}
-            <div className="bg-gradient-to-br from-[#cb356b] via-[#d6477b] to-[#bd3f32] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-amber-500/20 flex flex-col justify-between h-48 select-none">
+            <div className="bg-gradient-to-br from-[#7a1223] via-[#911d32] to-[#540813] rounded-2xl p-5 text-white shadow-xl relative overflow-hidden border border-amber-500/20 flex flex-col justify-between h-48 select-none">
               {/* Elegant dual-tone background gold glows instead of waves */}
               <div className="absolute -right-8 -bottom-8 w-44 h-44 bg-gradient-to-br from-amber-400/20 to-transparent rounded-full blur-2xl pointer-events-none"></div>
               <div className="absolute -left-12 -top-12 w-44 h-44 bg-gradient-to-br from-rose-400/10 to-transparent rounded-full blur-2xl pointer-events-none"></div>
@@ -732,7 +781,7 @@ export default function DashboardNasabah({
 
                 <button
                   type="submit"
-                  className="w-full py-3 bg-gradient-to-r from-[#cb356b] to-[#bd3f32] hover:from-[#bd3f32] hover:to-[#cb356b] text-white text-xs font-bold rounded-xl shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white text-xs font-bold rounded-xl shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2"
                 >
                   <KeyRound className="w-3.5 h-3.5" />
                   SIMPAN PASSWORD BARU

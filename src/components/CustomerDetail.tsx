@@ -105,7 +105,7 @@ export default function CustomerDetail({
     setModalError('');
 
     if (activeModal === 'DEPOSIT' || activeModal === 'WITHDRAWAL') {
-      const amount = Number(txAmount);
+      const amount = Number(txAmount.replace(/\./g, ''));
       if (isNaN(amount) || amount <= 0) {
         setModalError('Nominal transaksi harus berupa angka positif lebih besar dari nol.');
         return;
@@ -145,7 +145,7 @@ export default function CustomerDetail({
     }
 
     else if (activeModal === 'LOAN_NEW') {
-      const amount = Number(txAmount);
+      const amount = Number(txAmount.replace(/\./g, ''));
       if (isNaN(amount) || amount <= 0) {
         setModalError('Nominal kontrak pinjaman harus berupa angka positif lebih besar dari nol.');
         return;
@@ -156,7 +156,7 @@ export default function CustomerDetail({
     }
 
     else if (activeModal === 'LOAN_PAY') {
-      const amount = Number(txAmount);
+      const amount = Number(txAmount.replace(/\./g, ''));
       if (isNaN(amount) || amount <= 0) {
         setModalError('Nominal cicilan pinjaman harus berupa angka positif lebih besar dari nol.');
         return;
@@ -215,7 +215,7 @@ export default function CustomerDetail({
         
         {/* Profile Card Left */}
         <div className="flex gap-4">
-          <div className="w-14 h-14 bg-gradient-to-br from-[#cb356b] to-[#bd3f32] rounded-2xl flex items-center justify-center text-white font-black text-xl font-display shrink-0 select-none shadow-md shadow-primary/10">
+          <div className="w-14 h-14 bg-gradient-to-br from-[#7a1223] to-[#540813] rounded-2xl flex items-center justify-center text-white font-black text-xl font-display shrink-0 select-none shadow-md shadow-primary/10">
             {customer.name.charAt(0)}
           </div>
           <div>
@@ -682,7 +682,7 @@ export default function CustomerDetail({
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full overflow-hidden border border-gray-100 animate-scaleIn">
             
             {/* Modal Header */}
-            <div className="bg-gradient-to-r from-[#cb356b] to-[#bd3f32] text-white p-5 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-[#7a1223] to-[#540813] text-white p-5 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Landmark className="w-4.5 h-4.5 text-amber-300 shrink-0" />
                 <h3 className="text-xs font-bold font-display uppercase tracking-wider">
@@ -723,10 +723,13 @@ export default function CustomerDetail({
                     )}
                   </div>
                   <input
-                    type="number"
+                    type="text"
                     value={txAmount}
-                    onChange={(e) => setTxAmount(e.target.value)}
-                    placeholder="Contoh: 500000 (Tanpa titik/koma)"
+                    onChange={(e) => {
+                      const clean = e.target.value.replace(/\D/g, '');
+                      setTxAmount(clean === '' ? '' : Number(clean).toLocaleString('id-ID'));
+                    }}
+                    placeholder="Contoh: 500.000"
                     className="w-full px-3.5 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary text-gray-900"
                     autoFocus
                   />
@@ -787,9 +790,12 @@ export default function CustomerDetail({
                   <div className="space-y-1">
                     <label className="text-[10px] font-bold text-gray-500 uppercase block">Nominal Pembayaran Cicilan</label>
                     <input
-                      type="number"
+                      type="text"
                       value={txAmount}
-                      onChange={(e) => setTxAmount(e.target.value)}
+                      onChange={(e) => {
+                        const clean = e.target.value.replace(/\D/g, '');
+                        setTxAmount(clean === '' ? '' : Number(clean).toLocaleString('id-ID'));
+                      }}
                       placeholder="Masukkan nominal pembayaran cash..."
                       className="w-full px-3.5 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary text-gray-900"
                     />

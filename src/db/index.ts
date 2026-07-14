@@ -6,7 +6,7 @@ const { Pool } = pkg;
 
 export const createPool = () => {
   const connectionString = process.env.DATABASE_URL;
-  if (connectionString) {
+  if (connectionString && (connectionString.startsWith('postgres://') || connectionString.startsWith('postgresql://'))) {
     return new Pool({
       connectionString,
       connectionTimeoutMillis: 15000,

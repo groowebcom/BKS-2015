@@ -10,7 +10,7 @@ import { GoldPrice, UserRole } from '../types';
 interface GoldPricePageProps {
   goldPrices: GoldPrice[];
   userRole: UserRole;
-  onUpdateGoldPrice: (price: number) => void;
+  onUpdateGoldPrice: (price: number) => Promise<void>;
 }
 
 export default function GoldPricePage({
@@ -34,7 +34,7 @@ export default function GoldPricePage({
     return 'Rp ' + val.toLocaleString('id-ID');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -44,15 +44,19 @@ export default function GoldPricePage({
       return;
     }
 
-    const price = Number(newPrice);
+    const price = Number(newPrice.replace(/\./g, ''));
     if (isNaN(price) || price <= 0) {
       setError('Masukkan nominal harga emas yang valid (angka positif di atas nol).');
       return;
     }
 
-    onUpdateGoldPrice(price);
-    setSuccess(`Harga emas aktif berhasil diperbarui menjadi ${formatIDR(price)} / gram!`);
-    setNewPrice('');
+    try {
+      await onUpdateGoldPrice(price);
+      setSuccess(`Harga emas aktif berhasil diperbarui menjadi ${formatIDR(price)} / gram!`);
+      setNewPrice('');
+    } catch (err: any) {
+      setError(err.message || 'Gagal menyimpan harga emas baru ke database.');
+    }
   };
 
   return (
@@ -158,17 +162,20 @@ export default function GoldPricePage({
               <div className="space-y-1">
                 <label className="text-[10px] font-bold text-gray-500 uppercase block">Harga Per Gram (Rupiah)</label>
                 <input
-                  type="number"
+                  type="text"
                   value={newPrice}
-                  onChange={(e) => setNewPrice(e.target.value)}
-                  placeholder="Contoh: 1420000 (Tanpa titik/koma)"
+                  onChange={(e) => {
+                    const clean = e.target.value.replace(/\D/g, '');
+                    setNewPrice(clean === '' ? '' : Number(clean).toLocaleString('id-ID'));
+                  }}
+                  placeholder="Contoh: 1.420.000"
                   className="w-full px-3.5 py-3 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-primary text-gray-900 placeholder:text-gray-400"
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-[#cb356b] to-[#bd3f32] hover:from-[#bd3f32] hover:to-[#cb356b] text-white text-xs font-bold rounded-xl shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2 active:scale-95"
+                className="w-full py-3 bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white text-xs font-bold rounded-xl shadow-md shadow-primary/10 transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 <Check className="w-3.5 h-3.5" />
                 Daftarkan Harga Baru

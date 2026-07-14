@@ -308,7 +308,7 @@ export default function CustomerList({
                 <div className="flex items-center justify-between gap-1.5 pt-1.5">
                   <button
                     onClick={() => onSelectCustomer(cust.id)}
-                    className="flex-1 py-2 bg-gradient-to-r from-[#cb356b] to-[#bd3f32] hover:from-[#bd3f32] hover:to-[#cb356b] text-white text-[10px] font-bold rounded-xl transition-all shadow-sm shadow-primary/5 flex items-center justify-center gap-1 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+                    className="flex-1 py-2 bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white text-[10px] font-bold rounded-xl transition-all shadow-sm shadow-primary/5 flex items-center justify-center gap-1 hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     {forcedActionLabel || 'Buka Detail Mutasi'}
@@ -382,7 +382,7 @@ export default function CustomerList({
       {isAddModalOpen && (
         <div className="fixed inset-0 bg-gray-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden border border-gray-100 animate-scaleIn">
-            <div className="bg-gradient-to-r from-[#cb356b] to-[#bd3f32] text-white p-5 flex justify-between items-center">
+            <div className="bg-gradient-to-r from-[#7a1223] to-[#540813] text-white p-5 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <Landmark className="w-5 h-5 text-amber-300" />
                 <h3 className="text-sm font-bold font-display uppercase tracking-wide">Pendaftaran Nasabah BKS Baru</h3>

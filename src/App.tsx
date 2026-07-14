@@ -611,7 +611,14 @@ export default function App() {
 
   // Commodity Price updating (BR-407)
   const handleUpdateGoldPrice = async (price: number) => {
-    const nextCount = goldPrices.length + 1;
+    const maxId = goldPrices.reduce((max, item) => {
+      const match = item.id.match(/^GP-(\d+)$/);
+      if (match) {
+        return Math.max(max, parseInt(match[1], 10));
+      }
+      return max;
+    }, 0);
+    const nextCount = Math.max(goldPrices.length, maxId) + 1;
     const newPriceRecord: GoldPrice = {
       id: 'GP-' + nextCount.toString().padStart(3, '0'),
       price: price,
@@ -620,16 +627,27 @@ export default function App() {
     };
 
     try {
-      const saved = await fetch('/api/gold-prices', {
+      const res = await fetch('/api/gold-prices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPriceRecord)
-      }).then(r => r.json());
+      });
+      
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP error ${res.status}`);
+      }
+
+      const saved = await res.json();
+      if (saved.error) {
+        throw new Error(saved.error);
+      }
 
       setGoldPrices(prev => [...prev, saved]);
       logSystemActivity('GOLD_PRICE_UPDATE', `Owner mengubah harga acuan emas aktif menjadi Rp ${price.toLocaleString('id-ID')} / gram`);
     } catch (err) {
       console.error('Error updating gold price:', err);
+      throw err;
     }
   };
 

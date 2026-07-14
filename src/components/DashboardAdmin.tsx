@@ -59,7 +59,7 @@ export default function DashboardAdmin({
       {/* Welcome Card */}
       <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary-light px-2.5 py-1 rounded-lg">
             Petugas Loket Operasional
           </span>
           <h1 className="text-xl sm:text-2xl font-black font-display text-slate-900 mt-2">
@@ -72,7 +72,7 @@ export default function DashboardAdmin({
         
         {/* Dynamic Clock Indicator */}
         <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 px-4 py-2.5 rounded-xl shrink-0">
-          <Landmark className="w-5 h-5 text-blue-600" />
+          <Landmark className="w-5 h-5 text-primary" />
           <div className="text-left">
             <span className="text-[9px] text-slate-400 font-bold block uppercase leading-none">Gerai BKS</span>
             <span className="text-xs font-black text-slate-800 leading-none">12 Juli 2026</span>
@@ -96,7 +96,7 @@ export default function DashboardAdmin({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Cari Nasabah (Contoh: Ahmad, Aminah, Sri, atau NIK...)"
-            className="w-full pl-10 pr-4 py-3 text-sm bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all text-slate-900 placeholder:text-slate-400"
+            className="w-full pl-10 pr-4 py-3 text-sm bg-slate-50/50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 placeholder:text-slate-400"
           />
         </div>
 
@@ -112,14 +112,14 @@ export default function DashboardAdmin({
                 <div 
                   key={cust.id} 
                   onClick={() => onSelectCustomer(cust.id)}
-                  className="flex items-center justify-between p-3 bg-white hover:bg-blue-50/50 rounded-lg border border-slate-200 cursor-pointer transition-all hover:border-blue-300 group"
+                  className="flex items-center justify-between p-3 bg-white hover:bg-primary-light/50 rounded-lg border border-slate-200 cursor-pointer transition-all hover:border-primary-light group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs uppercase shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-primary-light text-primary flex items-center justify-center font-bold text-xs uppercase shrink-0">
                       {cust.name.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition-colors">{cust.name}</h4>
+                      <h4 className="text-xs font-bold text-slate-900 group-hover:text-primary transition-colors">{cust.name}</h4>
                       <span className="text-[10px] text-slate-400 font-semibold font-mono block">
                         {cust.memberNumber} • NIK: {cust.nik}
                       </span>
@@ -131,7 +131,7 @@ export default function DashboardAdmin({
                     }`}>
                       {cust.status === 'ACTIVE' ? 'Aktif' : 'Nonaktif'}
                     </span>
-                    <span className="text-[10px] font-extrabold text-blue-600 hover:underline flex items-center gap-0.5">
+                    <span className="text-[10px] font-extrabold text-primary hover:underline flex items-center gap-0.5">
                       Pilih <ArrowUpRight className="w-3 h-3" />
                     </span>
                   </div>
@@ -141,7 +141,7 @@ export default function DashboardAdmin({
             <div className="text-center pt-1.5 border-t border-slate-200">
               <button 
                 onClick={() => setActiveTab('customers')} 
-                className="text-[11px] font-bold text-blue-600 hover:underline"
+                className="text-[11px] font-bold text-primary hover:underline"
               >
                 Buka Seluruh Daftar Nasabah ({customers.length} Orang)
               </button>
@@ -155,9 +155,9 @@ export default function DashboardAdmin({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <button
             onClick={() => setActiveTab('customers')}
-            className="p-5 bg-white border border-slate-200 hover:border-blue-300 rounded-2xl shadow-xs text-left transition-all group relative overflow-hidden"
+            className="p-5 bg-white border border-slate-200 hover:border-primary-light rounded-2xl shadow-xs text-left transition-all group relative overflow-hidden"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+            <div className="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center mb-3">
               <Users className="w-5 h-5" />
             </div>
             <h4 className="text-xs font-extrabold text-slate-900">Catat Setoran Uang</h4>
@@ -188,10 +188,10 @@ export default function DashboardAdmin({
 
           <button
             onClick={() => setActiveTab('customers')}
-            className="p-5 bg-white border border-slate-200 hover:border-blue-300 rounded-2xl shadow-xs text-left transition-all group relative overflow-hidden"
+            className="p-5 bg-white border border-slate-200 hover:border-primary-light rounded-2xl shadow-xs text-left transition-all group relative overflow-hidden"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-              <Search className="w-5 h-5 text-blue-500" />
+            <div className="w-10 h-10 rounded-xl bg-primary-light text-primary flex items-center justify-center mb-3">
+              <Search className="w-5 h-5 text-primary" />
             </div>
             <h4 className="text-xs font-extrabold text-slate-900">Cari Data & Cetak</h4>
             <span className="text-[10px] text-slate-400 block mt-1">Cek riwayat tabungan & pinjaman nasabah</span>
@@ -226,7 +226,7 @@ export default function DashboardAdmin({
 
           <div className="pt-2">
             <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Perputaran Loket Anda</span>
-            <span className="text-lg font-black text-blue-600 font-display">
+            <span className="text-lg font-black text-primary font-display">
               Rp {totalTodayMoneyVolume > 0 ? totalTodayMoneyVolume.toLocaleString('id-ID') : '0'}
             </span>
           </div>

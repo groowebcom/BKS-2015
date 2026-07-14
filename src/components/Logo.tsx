@@ -23,7 +23,7 @@ export function Logo({ className = '', size = 'md', variant = 'dark' }: LogoProp
   return (
     <div id="bks-logo-brand" className={`flex items-center select-none ${className}`}>
       <img
-        src="https://grooweb.com/wp-content/uploads/2026/07/bks2015.png"
+        src="https://grooweb.com/wp-content/uploads/2026/07/WhatsApp-Image-2026-07-13-at-1.17.33-PM-Photoroom-e1784010911265.png"
         alt="BKS 2015"
         className={`${activeHeight} object-contain transition-all duration-300 ${filterClass}`}
         referrerPolicy="no-referrer"

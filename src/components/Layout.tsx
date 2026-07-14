@@ -61,13 +61,13 @@ export function Sidebar({ activeTab, setActiveTab, userRole }: {
               onClick={() => setActiveTab(item.id)}
               className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-xs font-bold transition-all duration-200 group ${
                 isActive
-                  ? 'bg-blue-600 text-white shadow-sm'
+                  ? 'bg-primary text-white shadow-sm'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               <div className="flex items-center gap-3">
                 <Icon className={`w-4 h-4 shrink-0 transition-transform group-hover:scale-105 duration-200 ${
-                  isActive ? 'text-white' : 'text-slate-400 group-hover:text-blue-600'
+                  isActive ? 'text-white' : 'text-slate-400 group-hover:text-primary'
                 }`} />
                 <span>{item.label}</span>
               </div>
@@ -90,7 +90,7 @@ export function Sidebar({ activeTab, setActiveTab, userRole }: {
       {/* User Session Footer Card */}
       <div className="p-4 border-t border-slate-200 bg-slate-50/50">
         <div className="flex items-center gap-3 mb-2.5">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center border border-blue-200/50 text-blue-700 font-bold text-xs uppercase">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-light to-primary-light/80 flex items-center justify-center border border-primary-light/40 text-primary font-bold text-xs uppercase">
             {userRole === UserRole.OWNER ? 'O' : 'A'}
           </div>
           <div className="truncate">
@@ -250,7 +250,7 @@ export default function Layout({
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   isActive
-                    ? 'bg-blue-600 text-white'
+                    ? 'bg-primary text-white'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >

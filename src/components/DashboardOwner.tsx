@@ -97,26 +97,26 @@ export default function DashboardOwner({
     <div className="space-y-6">
       
       {/* Welcome Card & Header Banner */}
-      <div className="bg-gradient-to-br from-blue-700 via-blue-600 to-blue-800 rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
+      <div className="bg-gradient-to-br from-[#7a1223] via-[#650f1d] to-[#540813] rounded-2xl p-6 sm:p-8 text-white shadow-md relative overflow-hidden">
         {/* Subtle background graphic design */}
         <div className="absolute right-0 bottom-0 top-0 w-1/3 opacity-10 flex items-center justify-center pointer-events-none">
           <Landmark className="w-64 h-64 text-white" />
         </div>
         
         <div className="relative z-10">
-          <span className="text-xs uppercase tracking-wider font-extrabold text-blue-200">Panel Pengawas Owner</span>
+          <span className="text-xs uppercase tracking-wider font-extrabold text-red-200">Panel Pengawas Owner</span>
           <h1 className="text-2xl sm:text-3xl font-extrabold font-display mt-1">Selamat Datang, Pak Dedek</h1>
-          <p className="text-sm text-blue-100/90 mt-1 max-w-xl">
+          <p className="text-sm text-red-100/90 mt-1 max-w-xl">
             Sistem Tabungan Digital berjalan stabil. Seluruh saldo dihitung secara real-time berdasarkan riwayat transaksi yang permanen.
           </p>
           
           <div className="mt-4 pt-4 border-t border-white/10 flex flex-wrap gap-4 text-xs font-semibold">
             <div>
-              <span className="text-blue-200">Waktu Server:</span> <span className="font-mono">12 Jul 2026, 10:15 WIB</span>
+              <span className="text-red-200">Waktu Server:</span> <span className="font-mono">12 Jul 2026, 10:15 WIB</span>
             </div>
             <div className="hidden sm:block text-white/20">|</div>
             <div>
-              <span className="text-blue-200">Database Status:</span> <span className="text-emerald-300">● Tersinkronisasi (OK)</span>
+              <span className="text-red-200">Database Status:</span> <span className="text-emerald-300">● Tersinkronisasi (OK)</span>
             </div>
           </div>
         </div>
@@ -144,9 +144,9 @@ export default function DashboardOwner({
 
           <button
             onClick={() => setActiveTab('import')}
-            className="flex flex-col items-center justify-center p-3.5 rounded-xl border border-gray-100 hover:border-blue-50 bg-gray-50/50 hover:bg-blue-50 text-gray-700 hover:text-blue-700 transition-all duration-200 group text-center"
+            className="flex flex-col items-center justify-center p-3.5 rounded-xl border border-gray-100 hover:border-primary-light bg-gray-50/50 hover:bg-primary-light text-gray-700 hover:text-primary transition-all duration-200 group text-center"
           >
-            <Upload className="w-5 h-5 text-gray-500 group-hover:text-blue-600 mb-2 transition-transform group-hover:scale-110" />
+            <Upload className="w-5 h-5 text-gray-500 group-hover:text-primary mb-2 transition-transform group-hover:scale-110" />
             <span className="text-xs font-bold">Import Data Excel</span>
           </button>
 
@@ -183,7 +183,7 @@ export default function DashboardOwner({
               {customerGrowth}
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center">
             <Users className="w-6 h-6" />
           </div>
         </div>
@@ -199,7 +199,7 @@ export default function DashboardOwner({
               Total tabungan uang masyarakat
             </span>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-primary-light text-primary flex items-center justify-center shrink-0">
             <Wallet className="w-6 h-6" />
           </div>
         </div>
@@ -230,7 +230,7 @@ export default function DashboardOwner({
             <span className="text-lg font-black tracking-tight text-slate-900 block truncate leading-none">
               {formatIDR(totalOutstanding)}
             </span>
-            <span className="text-[10px] text-blue-700 bg-blue-50 border border-blue-100 px-1.5 py-0.5 rounded font-bold block w-max mt-1">
+            <span className="text-[10px] text-primary bg-primary-light border border-primary-light/50 px-1.5 py-0.5 rounded font-bold block w-max mt-1">
               Peminjam Aktif
             </span>
           </div>
@@ -331,7 +331,7 @@ export default function DashboardOwner({
           </div>
           <button
             onClick={() => setActiveTab('audit-trail')}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 group transition-colors"
+            className="text-xs font-bold text-primary hover:text-primary/80 flex items-center gap-1 group transition-colors"
           >
             Buka Semua Log
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />

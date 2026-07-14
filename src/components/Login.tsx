@@ -287,9 +287,6 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
           {/* Login Card */}
           <div id="login-card" className="bg-white rounded-2xl shadow-2xl shadow-gray-200/50 border border-gray-100/80 p-6 sm:p-8 relative overflow-hidden backdrop-blur-xs">
             
-            {/* Top accent gradient border */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-rose-500 via-amber-500 to-rose-600 z-10" />
-
             {/* Segmented Controller Tab */}
             <div className="flex p-1 bg-gray-100 rounded-xl mb-6">
               <button
@@ -387,7 +384,7 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                   loading
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed shadow-none'
                     : activeTab === 'customer'
-                    ? 'bg-gradient-to-r from-[#cb356b] to-[#bd3f32] hover:from-[#bd3f32] hover:to-[#cb356b] text-white shadow-primary/20 hover:shadow-lg'
+                    ? 'bg-gradient-to-r from-[#7a1223] to-[#540813] hover:from-[#540813] hover:to-[#7a1223] text-white shadow-primary/20 hover:shadow-lg'
                     : 'bg-gradient-to-r from-amber-500 to-gold hover:from-gold hover:to-amber-500 text-gray-900 shadow-amber-500/10 hover:shadow-lg'
                 }`}
               >
