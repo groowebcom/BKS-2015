@@ -347,11 +347,6 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                   <label className="block text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Password
                   </label>
-                  {activeTab === 'customer' && (
-                    <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded font-medium">
-                      Password awal = Tgl Lahir (19021978)
-                    </span>
-                  )}
                 </div>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400">
@@ -374,6 +369,11 @@ export default function Login({ onLoginSuccess, customers }: LoginProps) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {activeTab === 'customer' && (
+                  <p className="mt-1.5 text-[11px] text-gray-500 font-medium">
+                    Password awal = Tgl Lahir (19021978)
+                  </p>
+                )}
               </div>
 
               <button
