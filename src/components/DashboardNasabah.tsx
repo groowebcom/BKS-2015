@@ -99,17 +99,17 @@ export default function DashboardNasabah({
   return (
     <div className="max-w-md mx-auto bg-[#F8F9FA] min-h-screen flex flex-col relative text-gray-900 shadow-2xl rounded-3xl border border-gray-100 overflow-hidden font-sans">
       
-      {/* App Main Header Bar with modern dark maroon gradient theme */}
-      <div className="bg-gradient-to-r from-[#4C0519] via-[#2F000B] to-[#1A0006] px-6 py-5 text-white shrink-0 relative border-b border-rose-950/40 shadow-md">
+      {/* App Main Header Bar with modern soft rose/slate theme */}
+      <div className="bg-gradient-to-r from-rose-50/70 via-slate-50/70 to-zinc-50/70 px-6 py-5 text-slate-800 shrink-0 relative border-b border-rose-100/60 shadow-xs">
         <div className="flex justify-between items-center relative z-10">
           <div className="flex items-center gap-3">
             {/* Round Avatar with clean border */}
-            <div className="w-11 h-11 bg-white/10 border border-white/20 rounded-full flex items-center justify-center font-bold font-display text-white text-base shadow-xs shrink-0">
+            <div className="w-11 h-11 bg-rose-100/80 border border-rose-200 rounded-full flex items-center justify-center font-bold font-display text-rose-700 text-base shadow-xs shrink-0">
               {customer.name.charAt(0)}
             </div>
             <div className="text-left">
-              <h2 className="text-base font-extrabold tracking-tight text-white leading-tight">{customer.name}</h2>
-              <span className="text-[11px] text-rose-200/80 font-bold tracking-wide flex items-center gap-0.5 mt-0.5 cursor-pointer hover:text-white transition-all select-none">
+              <h2 className="text-base font-extrabold tracking-tight text-slate-800 leading-tight">{customer.name}</h2>
+              <span className="text-[11px] text-slate-500 font-bold tracking-wide flex items-center gap-0.5 mt-0.5 cursor-pointer hover:text-slate-800 transition-all select-none">
                 ID: {customer.memberNumber} <ChevronRight className="w-3.5 h-3.5 opacity-80" />
               </span>
             </div>
@@ -118,8 +118,8 @@ export default function DashboardNasabah({
           <div className="flex items-center gap-1.5">
             {/* Eye toggle button */}
             <button
-              onClick={() => setIsBalanceVisible(!isBalanceVisible)}
-              className="p-1.5 hover:bg-white/10 rounded-full text-rose-200/90 hover:text-white transition-all"
+               onClick={() => setIsBalanceVisible(!isBalanceVisible)}
+              className="p-1.5 hover:bg-slate-200/60 rounded-full text-slate-500 hover:text-slate-800 transition-all cursor-pointer"
               title={isBalanceVisible ? "Sembunyikan Saldo" : "Tampilkan Saldo"}
             >
               {isBalanceVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -127,11 +127,11 @@ export default function DashboardNasabah({
             
             {/* Settings/Gear Icon */}
             <button
-              onClick={() => setActiveTab('profile')}
-              className={`p-1.5 rounded-full transition-all ${
+               onClick={() => setActiveTab('profile')}
+              className={`p-1.5 rounded-full transition-all cursor-pointer ${
                 activeTab === 'profile' 
-                  ? 'bg-white/15 text-white' 
-                  : 'text-rose-200/90 hover:text-white hover:bg-white/10'
+                  ? 'bg-rose-100 text-rose-700 border border-rose-200/50' 
+                  : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/60'
               }`}
               title="Profil & Pengaturan"
             >
@@ -144,7 +144,7 @@ export default function DashboardNasabah({
             {/* Logout button */}
             <button
               onClick={onLogout}
-              className="p-1.5 text-rose-200/90 hover:text-white hover:bg-white/10 rounded-full transition-all"
+              className="p-1.5 text-slate-500 hover:text-rose-700 hover:bg-rose-100/60 rounded-full transition-all cursor-pointer"
               title="Keluar"
             >
               <LogOut className="w-5 h-5" />
@@ -153,12 +153,12 @@ export default function DashboardNasabah({
         </div>
 
         {/* Integrated Sub-Header display for Gold price */}
-        <div className="flex justify-between items-center text-xs mt-4 pt-3.5 border-t border-white/10 relative z-10">
-          <div className="text-[10px] font-mono tracking-wider bg-white/10 border border-white/10 text-rose-100 px-2.5 py-0.5 rounded font-bold">
+        <div className="flex justify-between items-center text-xs mt-4 pt-3.5 border-t border-slate-200/60 relative z-10">
+          <div className="text-[10px] font-mono tracking-wider bg-rose-100/50 border border-rose-200 text-rose-800 px-2.5 py-0.5 rounded font-bold">
             Nasabah ID: {customer.memberNumber}
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-rose-100/90">
-            <Coins className="w-3.5 h-3.5 text-amber-400" />
+          <div className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-slate-600">
+            <Coins className="w-3.5 h-3.5 text-amber-500" />
             Harga Emas: Rp {currentGoldPrice.toLocaleString('id-ID')} / g
           </div>
         </div>

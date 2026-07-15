@@ -46,7 +46,7 @@ app.use(express.json());
       }
 
       const existing = await db.select().from(customers).where(eq(customers.id, data.id));
-      if (existing.length > 0) {
+      if (existing.length > 0 && existing[0].memberNumber === data.memberNumber) {
         // Update
         const updated = await db.update(customers)
           .set({
@@ -65,10 +65,33 @@ app.use(express.json());
         return res.json(updated[0]);
       } else {
         // Insert
+        let targetId = data.id;
+        let targetMemberNumber = data.memberNumber;
+
+        const allCustomers = await db.select().from(customers);
+        const existingIds = new Set(allCustomers.map(c => c.id));
+        const existingMemberNumbers = new Set(allCustomers.map(c => c.memberNumber));
+
+        if (existingIds.has(targetId) || existingMemberNumbers.has(targetMemberNumber)) {
+          const maxId = allCustomers.reduce((max, item) => {
+            const match = item.id.match(/^CUST-(\d+)$/);
+            return match ? Math.max(max, parseInt(match[1], 10)) : max;
+          }, 0);
+          const nextCount = Math.max(allCustomers.length, maxId) + 1;
+          targetId = 'CUST-' + nextCount.toString().padStart(3, '0');
+          targetMemberNumber = 'BKS-2026-' + nextCount.toString().padStart(3, '0');
+
+          while (existingIds.has(targetId) || existingMemberNumbers.has(targetMemberNumber)) {
+            const rand = Math.floor(Math.random() * 1000);
+            targetId = `CUST-${Date.now()}-${rand}`;
+            targetMemberNumber = `BKS-2026-${Date.now()}-${rand}`;
+          }
+        }
+
         const inserted = await db.insert(customers)
           .values({
-            id: data.id,
-            memberNumber: data.memberNumber,
+            id: targetId,
+            memberNumber: targetMemberNumber,
             name: data.name,
             nik: data.nik,
             birthDate: data.birthDate,
@@ -102,12 +125,31 @@ app.use(express.json());
   app.post('/api/gold-prices', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.price || !data.date || !data.updatedBy) {
+      if (!data.price || !data.date || !data.updatedBy) {
         return res.status(400).json({ error: 'Missing required gold price fields' });
       }
+
+      let targetId = data.id;
+      const allPrices = await db.select().from(goldPrices);
+      const existingIds = new Set(allPrices.map(p => p.id));
+
+      if (!targetId || existingIds.has(targetId)) {
+        const maxId = allPrices.reduce((max, item) => {
+          const match = item.id.match(/^GP-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allPrices.length, maxId) + 1;
+        targetId = 'GP-' + nextCount.toString().padStart(3, '0');
+
+        while (existingIds.has(targetId)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `GP-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(goldPrices)
         .values({
-          id: data.id,
+          id: targetId,
           price: Number(data.price),
           date: data.date,
           updatedBy: data.updatedBy,
@@ -134,13 +176,37 @@ app.use(express.json());
   app.post('/api/money-transactions', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.transactionNumber || !data.customerId || !data.type || data.amount === undefined || !data.date || !data.createdBy) {
+      if (!data.customerId || !data.type || data.amount === undefined || !data.date || !data.createdBy) {
         return res.status(400).json({ error: 'Missing required money transaction fields' });
       }
+
+      let targetId = data.id;
+      let targetTxNumber = data.transactionNumber;
+
+      const allTxs = await db.select().from(moneyTransactions);
+      const existingIds = new Set(allTxs.map(t => t.id));
+      const existingTxNumbers = new Set(allTxs.map(t => t.transactionNumber));
+
+      if (!targetId || existingIds.has(targetId) || !targetTxNumber || existingTxNumbers.has(targetTxNumber)) {
+        const maxId = allTxs.reduce((max, item) => {
+          const match = item.id.match(/^MT-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allTxs.length, maxId) + 1;
+        targetId = 'MT-' + nextCount.toString().padStart(3, '0');
+        targetTxNumber = 'TXM-2026-' + nextCount.toString().padStart(4, '0');
+
+        while (existingIds.has(targetId) || existingTxNumbers.has(targetTxNumber)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `MT-${Date.now()}-${rand}`;
+          targetTxNumber = `TXM-2026-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(moneyTransactions)
         .values({
-          id: data.id,
-          transactionNumber: data.transactionNumber,
+          id: targetId,
+          transactionNumber: targetTxNumber,
           customerId: data.customerId,
           type: data.type,
           amount: Number(data.amount),
@@ -190,13 +256,37 @@ app.use(express.json());
   app.post('/api/gold-transactions', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.transactionNumber || !data.customerId || !data.type || data.weight === undefined || data.goldPriceSnapshot === undefined || data.amountRupiah === undefined || !data.date || !data.createdBy) {
+      if (!data.customerId || !data.type || data.weight === undefined || data.goldPriceSnapshot === undefined || data.amountRupiah === undefined || !data.date || !data.createdBy) {
         return res.status(400).json({ error: 'Missing required gold transaction fields' });
       }
+
+      let targetId = data.id;
+      let targetTxNumber = data.transactionNumber;
+
+      const allTxs = await db.select().from(goldTransactions);
+      const existingIds = new Set(allTxs.map(t => t.id));
+      const existingTxNumbers = new Set(allTxs.map(t => t.transactionNumber));
+
+      if (!targetId || existingIds.has(targetId) || !targetTxNumber || existingTxNumbers.has(targetTxNumber)) {
+        const maxId = allTxs.reduce((max, item) => {
+          const match = item.id.match(/^GT-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allTxs.length, maxId) + 1;
+        targetId = 'GT-' + nextCount.toString().padStart(3, '0');
+        targetTxNumber = 'TXG-2026-' + nextCount.toString().padStart(4, '0');
+
+        while (existingIds.has(targetId) || existingTxNumbers.has(targetTxNumber)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `GT-${Date.now()}-${rand}`;
+          targetTxNumber = `TXG-2026-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(goldTransactions)
         .values({
-          id: data.id,
-          transactionNumber: data.transactionNumber,
+          id: targetId,
+          transactionNumber: targetTxNumber,
           customerId: data.customerId,
           type: data.type,
           weight: Number(data.weight),
@@ -248,13 +338,37 @@ app.use(express.json());
   app.post('/api/loans', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.loanNumber || !data.customerId || data.amount === undefined || data.outstanding === undefined || !data.date || !data.note) {
+      if (!data.customerId || data.amount === undefined || data.outstanding === undefined || !data.date || !data.note) {
         return res.status(400).json({ error: 'Missing required loan fields' });
       }
+
+      let targetId = data.id;
+      let targetLoanNumber = data.loanNumber;
+
+      const allLoans = await db.select().from(loans);
+      const existingIds = new Set(allLoans.map(l => l.id));
+      const existingLoanNumbers = new Set(allLoans.map(l => l.loanNumber));
+
+      if (!targetId || existingIds.has(targetId) || !targetLoanNumber || existingLoanNumbers.has(targetLoanNumber)) {
+        const maxId = allLoans.reduce((max, item) => {
+          const match = item.id.match(/^LN-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allLoans.length, maxId) + 1;
+        targetId = 'LN-' + nextCount.toString().padStart(3, '0');
+        targetLoanNumber = 'LOAN-2026-' + nextCount.toString().padStart(4, '0');
+
+        while (existingIds.has(targetId) || existingLoanNumbers.has(targetLoanNumber)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `LN-${Date.now()}-${rand}`;
+          targetLoanNumber = `LOAN-2026-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(loans)
         .values({
-          id: data.id,
-          loanNumber: data.loanNumber,
+          id: targetId,
+          loanNumber: targetLoanNumber,
           customerId: data.customerId,
           amount: Number(data.amount),
           outstanding: Number(data.outstanding),
@@ -302,12 +416,32 @@ app.use(express.json());
   app.post('/api/loan-payments', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.loanId || !data.customerId || data.amount === undefined || !data.date || !data.note || !data.createdBy) {
+      if (!data.loanId || !data.customerId || data.amount === undefined || !data.date || !data.note || !data.createdBy) {
         return res.status(400).json({ error: 'Missing required loan payment fields' });
       }
+
+      let targetId = data.id;
+
+      const allPayments = await db.select().from(loanPayments);
+      const existingIds = new Set(allPayments.map(p => p.id));
+
+      if (!targetId || existingIds.has(targetId)) {
+        const maxId = allPayments.reduce((max, item) => {
+          const match = item.id.match(/^LP-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allPayments.length, maxId) + 1;
+        targetId = 'LP-' + nextCount.toString().padStart(3, '0');
+
+        while (existingIds.has(targetId)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `LP-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(loanPayments)
         .values({
-          id: data.id,
+          id: targetId,
           loanId: data.loanId,
           customerId: data.customerId,
           amount: Number(data.amount),
@@ -337,12 +471,32 @@ app.use(express.json());
   app.post('/api/audit-logs', async (req, res) => {
     try {
       const data = req.body;
-      if (!data.id || !data.date || !data.user || !data.role || !data.activity || !data.object || !data.ipAddress) {
+      if (!data.date || !data.user || !data.role || !data.activity || !data.object || !data.ipAddress) {
         return res.status(400).json({ error: 'Missing required audit log fields' });
       }
+
+      let targetId = data.id;
+
+      const allLogs = await db.select().from(auditLogs);
+      const existingIds = new Set(allLogs.map(l => l.id));
+
+      if (!targetId || existingIds.has(targetId)) {
+        const maxId = allLogs.reduce((max, item) => {
+          const match = item.id.match(/^AL-(\d+)$/);
+          return match ? Math.max(max, parseInt(match[1], 10)) : max;
+        }, 0);
+        const nextCount = Math.max(allLogs.length, maxId) + 1;
+        targetId = 'AL-' + nextCount.toString().padStart(3, '0');
+
+        while (existingIds.has(targetId)) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `AL-${Date.now()}-${rand}`;
+        }
+      }
+
       const inserted = await db.insert(auditLogs)
         .values({
-          id: data.id,
+          id: targetId,
           date: data.date,
           user: data.user,
           role: data.role,
