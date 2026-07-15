@@ -19,6 +19,30 @@ import { eq, desc } from 'drizzle-orm';
 const app = express();
 app.use(express.json());
 
+// Database Configuration Guard Middleware
+app.use((req, res, next) => {
+  // Allow health check, init-db and assets to pass without DB configuration
+  if (req.path === '/api/health' || req.path === '/api/init-db' || !req.path.startsWith('/api/')) {
+    return next();
+  }
+
+  const hasDbUrl = process.env.DATABASE_URL && 
+    (process.env.DATABASE_URL.startsWith('postgres://') || process.env.DATABASE_URL.startsWith('postgresql://'));
+  const hasSqlCreds = !!(process.env.SQL_HOST && process.env.SQL_USER && process.env.SQL_PASSWORD && process.env.SQL_DB_NAME);
+
+  if (!hasDbUrl && !hasSqlCreds) {
+    console.warn(`[DB Guard] Blocked request to ${req.path} because no database configuration was found in environment variables.`);
+    return res.status(503).json({
+      error: 'Konfigurasi database tidak ditemukan.',
+      message: 'DATABASE_URL (untuk Supabase) atau SQL_HOST/SQL_USER tidak terdefinisi di Environment Variables Vercel atau Production.',
+      suggestion: 'Silakan buka dashboard Vercel / Cloud Run Anda, masuk ke Project Settings -> Environment Variables, lalu tambahkan DATABASE_URL dengan Connection String database PostgreSQL (dari Supabase) Anda.',
+      missingConfig: true
+    });
+  }
+
+  next();
+});
+
   // API Endpoints for BKS Savings System
 
   // 1. Health check

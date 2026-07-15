@@ -51,11 +51,39 @@ export default function App() {
   // Layout Nav States (for Admin/Owner staff)
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [viewingCustomer, setViewingCustomer] = useState<Customer | null>(null);
+  const [dbError, setDbError] = useState<{ error: string; message: string; suggestion: string } | null>(null);
 
   // Fetch all initial values from DB and restore Supabase session
   useEffect(() => {
     const loadAllData = async () => {
       try {
+        const fetchJson = async (url: string) => {
+          try {
+            const r = await fetch(url);
+            if (!r.ok) {
+              const text = await r.text();
+              try {
+                const parsed = JSON.parse(text);
+                if (parsed && parsed.missingConfig) {
+                  setDbError({
+                    error: parsed.error,
+                    message: parsed.message,
+                    suggestion: parsed.suggestion
+                  });
+                }
+                return parsed;
+              } catch (e) {
+                console.warn(`HTML error response received for ${url}:`, text.substring(0, 100));
+                return null;
+              }
+            }
+            return await r.json();
+          } catch (e) {
+            console.error(`Fetch error for ${url}:`, e);
+            return null;
+          }
+        };
+
         const [
           resCustomers,
           resMoneyTx,
@@ -65,13 +93,13 @@ export default function App() {
           resGoldPrices,
           resAuditLogs
         ] = await Promise.all([
-          fetch('/api/customers').then(r => r.json()),
-          fetch('/api/money-transactions').then(r => r.json()),
-          fetch('/api/gold-transactions').then(r => r.json()),
-          fetch('/api/loans').then(r => r.json()),
-          fetch('/api/loan-payments').then(r => r.json()),
-          fetch('/api/gold-prices').then(r => r.json()),
-          fetch('/api/audit-logs').then(r => r.json()),
+          fetchJson('/api/customers'),
+          fetchJson('/api/money-transactions'),
+          fetchJson('/api/gold-transactions'),
+          fetchJson('/api/loans'),
+          fetchJson('/api/loan-payments'),
+          fetchJson('/api/gold-prices'),
+          fetchJson('/api/audit-logs'),
         ]);
 
         let activeCustomers = INITIAL_CUSTOMERS;
@@ -743,6 +771,7 @@ export default function App() {
       userName={currentUserName}
       currentGoldPrice={currentGoldPrice}
       onLogout={handleLogout}
+      dbError={dbError}
     >
       
       {/* If viewing a customer details, override activeTab rendering */}

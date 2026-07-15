@@ -19,6 +19,7 @@ interface LayoutProps {
   userName: string;
   currentGoldPrice: number;
   onLogout: () => void;
+  dbError?: { error: string; message: string; suggestion: string } | null;
 }
 
 export function Sidebar({ activeTab, setActiveTab, userRole }: { 
@@ -112,7 +113,8 @@ export default function Layout({
   userRole, 
   userName, 
   currentGoldPrice, 
-  onLogout 
+  onLogout,
+  dbError
 }: LayoutProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isOwner = userRole === UserRole.OWNER;
@@ -210,6 +212,22 @@ export default function Layout({
         {/* Scrollable Main Content Container */}
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-slate-50">
           <div className="max-w-7xl mx-auto space-y-6">
+            {dbError && (
+              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 lg:p-5 flex flex-col md:flex-row items-start gap-4 shadow-sm animate-pulse-once">
+                <div className="p-3 bg-red-100 text-red-600 rounded-xl shrink-0">
+                  <Landmark className="w-6 h-6" />
+                </div>
+                <div className="space-y-1.5 flex-1">
+                  <h3 className="text-xs font-black uppercase text-red-900 tracking-wider">⚠️ KONEKSI DATABASE ERROR (VERCEL PRODUCTION)</h3>
+                  <p className="text-xs font-extrabold text-red-800">{dbError.error}</p>
+                  <p className="text-[11px] text-red-700 font-semibold">{dbError.message}</p>
+                  <div className="bg-white border border-red-100 rounded-xl p-3 mt-2 text-[11px] text-slate-700 leading-relaxed font-semibold">
+                    <p className="font-extrabold text-slate-900 uppercase tracking-tight text-[10px] mb-1">💡 Langkah Perbaikan:</p>
+                    {dbError.suggestion}
+                  </div>
+                </div>
+              </div>
+            )}
             {children}
           </div>
         </main>
