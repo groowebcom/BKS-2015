@@ -116,9 +116,9 @@ app.use(express.json());
     try {
       const prices = await db.select().from(goldPrices);
       res.json(prices);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching gold prices:', error);
-      res.status(500).json({ error: 'Failed to fetch gold prices' });
+      res.status(500).json({ error: `Gagal mengambil harga emas: ${error.message || error}` });
     }
   });
 
@@ -156,9 +156,9 @@ app.use(express.json());
         })
         .returning();
       res.json(inserted[0]);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving gold price:', error);
-      res.status(500).json({ error: 'Failed to save gold price' });
+      res.status(500).json({ error: `Gagal menyimpan harga emas: ${error.message || error}` });
     }
   });
 
