@@ -178,16 +178,18 @@ export const initializeSchema = async (pool: any) => {
   }
 };
 
-const pool = createPool();
+export const pool = createPool();
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle SQL pool client:', err);
 });
 
-// Run self-healing schema initialization on startup
-initializeSchema(pool).catch((err) => {
-  console.error('[Schema] Failed to execute background initialization:', err);
-});
+// Run self-healing schema initialization on startup (skip in serverless to prevent connection leaks & timeouts)
+if (process.env.VERCEL !== '1') {
+  initializeSchema(pool).catch((err) => {
+    console.error('[Schema] Failed to execute background initialization:', err);
+  });
+}
 
 export const db = drizzle(pool, { schema });
 export { schema };

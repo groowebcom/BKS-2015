@@ -3,8 +3,7 @@ dotenv.config({ override: true });
 
 import express from 'express';
 import path from 'path';
-import { createServer as createViteServer } from 'vite';
-import { db } from './src/db/index.ts';
+import { db, pool, initializeSchema } from './src/db/index.ts';
 import {
   users,
   customers,
@@ -25,6 +24,17 @@ app.use(express.json());
   // 1. Health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // 1.5. Manual database self-healing initializer
+  app.get('/api/init-db', async (req, res) => {
+    try {
+      await initializeSchema(pool);
+      res.json({ status: 'success', message: 'Database schema self-healing initialization completed successfully.' });
+    } catch (error: any) {
+      console.error('Manual DB Init Error:', error);
+      res.status(500).json({ error: `Manual initialization failed: ${error.message || error}` });
+    }
   });
 
   // 2. Customers
@@ -550,6 +560,7 @@ app.use(express.json());
   // Vite middleware for development or Static Asset serving for production
   async function setupStandaloneServer() {
     if (process.env.NODE_ENV !== 'production') {
+      const { createServer: createViteServer } = await import('vite');
       const vite = await createViteServer({
         server: { middlewareMode: true },
         appType: 'spa',
