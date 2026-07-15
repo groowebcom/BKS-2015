@@ -312,7 +312,7 @@ pool.on('error', (err) => {
 });
 
 // Run self-healing schema initialization on startup (skip in serverless to prevent connection leaks & timeouts, initialized lazily instead)
-let isInitialized = false;
+export let isInitialized = false;
 let initializingPromise: Promise<void> | null = null;
 export let schemaInitError: any = null;
 

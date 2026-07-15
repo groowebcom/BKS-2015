@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Upload, FileSpreadsheet, AlertCircle, CheckCircle, SlidersHorizontal, ArrowRight,
   Database, RefreshCcw, HelpCircle, FileCheck, FileX, Info, Landmark
@@ -26,6 +26,61 @@ export default function ImportPage({
   onImportGoldTx,
 }: ImportPageProps) {
   const isOwner = userRole === UserRole.OWNER;
+
+  // Database Diagnostics states
+  const [dbInfo, setDbInfo] = useState<{
+    status: string;
+    databaseType: string;
+    connectionString: string;
+    tableCounts: Record<string, number | string>;
+    isInitialized: boolean;
+    schemaInitError: string | null;
+  } | null>(null);
+  const [dbLoading, setDbLoading] = useState(false);
+  const [initLoading, setInitLoading] = useState(false);
+  const [initResult, setInitResult] = useState<{ status: string; message: string } | null>(null);
+
+  const fetchDbDiagnostics = async () => {
+    setDbLoading(true);
+    try {
+      const res = await fetch('/api/db-diagnostics');
+      if (res.ok) {
+        const data = await res.json();
+        setDbInfo(data);
+      }
+    } catch (e) {
+      console.error('Error fetching DB diagnostics:', e);
+    } finally {
+      setDbLoading(false);
+    }
+  };
+
+  const handleInitDb = async () => {
+    setInitLoading(true);
+    setInitResult(null);
+    try {
+      const res = await fetch('/api/init-db');
+      const data = await res.json();
+      setInitResult({
+        status: res.ok ? 'success' : 'error',
+        message: data.message || data.error || 'Terjadi kesalahan saat menginisialisasi database.',
+      });
+      await fetchDbDiagnostics();
+    } catch (e: any) {
+      setInitResult({
+        status: 'error',
+        message: e.message || String(e),
+      });
+    } finally {
+      setInitLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isOwner) {
+      fetchDbDiagnostics();
+    }
+  }, [isOwner]);
   
   // Selection
   const [importType, setImportType] = useState<'CUSTOMERS' | 'MONEY_TX' | 'GOLD_TX'>('CUSTOMERS');
@@ -217,7 +272,8 @@ export default function ImportPage({
 
       {/* Importer Core Panels */}
       {isOwner ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* File Drag and Drop Uploader Column */}
           <div className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm space-y-4 h-max">
@@ -511,6 +567,168 @@ export default function ImportPage({
           </div>
 
         </div>
+
+        {/* DATABASE STATUS AND SELF-HEALING DIAGNOSTICS CARD */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm space-y-6 mt-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+            <div className="space-y-1">
+              <h3 className="text-sm font-black text-gray-900 uppercase flex items-center gap-2">
+                <Database className="w-4 h-4 text-primary" />
+                Sistem Database & Status Sinkronisasi Produksi
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Pantau koneksi database Supabase/Cloud SQL Anda dan lakukan sinkronisasi data master secara instan jika terdapat data kosong atau tidak sinkron.
+              </p>
+            </div>
+            <button
+              onClick={fetchDbDiagnostics}
+              disabled={dbLoading}
+              className="px-4 py-2 bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 text-xs font-bold rounded-xl flex items-center gap-2 transition-all shrink-0 self-start sm:self-center"
+            >
+              <RefreshCcw className={`w-3.5 h-3.5 ${dbLoading ? 'animate-spin' : ''}`} />
+              Segarkan Status
+            </button>
+          </div>
+
+          {dbLoading && !dbInfo ? (
+            <div className="py-12 text-center flex flex-col items-center justify-center space-y-2">
+              <span className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></span>
+              <p className="text-xs text-gray-400 font-bold">Membaca data diagnosisi database...</p>
+            </div>
+          ) : dbInfo ? (
+            <div className="space-y-6">
+              {/* Connection info bar */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 border border-gray-100 p-4 rounded-xl">
+                <div>
+                  <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none">Tipe Database</span>
+                  <span className="text-xs font-extrabold text-gray-900 mt-1 block flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    {dbInfo.databaseType}
+                  </span>
+                </div>
+                <div className="md:col-span-2">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase block leading-none">Connection Endpoint</span>
+                  <span className="text-[11px] font-mono font-medium text-gray-600 mt-1 block truncate" title={dbInfo.connectionString}>
+                    {dbInfo.connectionString}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status and Diagnostics recommendations */}
+              {Object.values(dbInfo.tableCounts).some(v => v === 0 || typeof v === 'string') ? (
+                <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-xs text-amber-950 flex items-start gap-2.5">
+                  <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-extrabold block text-amber-900">Perhatian: Terdeteksi Tabel Database Kosong atau Bermasalah!</span>
+                    <p className="mt-0.5 leading-relaxed text-[11px]">
+                      Beberapa tabel master Anda saat ini dalam kondisi kosong (0 baris) di database produksi Supabase Anda. Ini menyebabkan fitur seperti update harga emas, transaksi tabungan uang, dan input transaksi emas mengalami kegagalan karena data referensi nasabah awal/harga emas belum terisi.
+                    </p>
+                    <p className="mt-1.5 font-bold text-amber-900 flex items-center gap-1">
+                      👉 Solusi: Silakan klik tombol <span className="underline">"Sinkronisasi & Perbaiki Struktur Database"</span> di bawah untuk otomatis melakukan pengisian data master awal (seeding) secara aman.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-xs text-emerald-950 flex items-start gap-2.5">
+                  <CheckCircle className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-extrabold block text-emerald-900">Database Berfungsi Dengan Sempurna!</span>
+                    <p className="mt-0.5 leading-relaxed">
+                      Seluruh tabel master telah terisi dan terhubung secara harmonis. Koneksi backend dengan PostgreSQL Supabase berjalan optimal tanpa hambatan.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Table counts grid */}
+              <div className="space-y-2">
+                <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Metrik Baris Tabel Master (Produksi)</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {Object.entries(dbInfo.tableCounts).map(([tableName, count]) => {
+                    const isEmpty = count === 0;
+                    const isErr = typeof count === 'string' && count.includes('Error');
+                    return (
+                      <div 
+                        key={tableName} 
+                        className={`p-3 border rounded-xl flex flex-col justify-between ${
+                          isErr ? 'bg-red-50/20 border-red-100 text-red-800' :
+                          isEmpty ? 'bg-amber-50/20 border-amber-100 text-amber-800' : 'bg-white border-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <span className="text-[10px] font-mono font-bold text-gray-400 uppercase tracking-tight block truncate">
+                          {tableName}
+                        </span>
+                        <div className="mt-2 flex items-baseline justify-between">
+                          <span className="text-lg font-black leading-none">
+                            {isErr ? 'ERR' : count}
+                          </span>
+                          {isEmpty && (
+                            <span className="text-[9px] font-bold bg-amber-100 text-amber-700 px-1 py-0.5 rounded leading-none">
+                              KOSONG
+                            </span>
+                          )}
+                          {isErr && (
+                            <span className="text-[9px] font-bold bg-red-100 text-red-700 px-1 py-0.5 rounded leading-none">
+                              MISSING
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action section */}
+              <div className="pt-4 border-t border-gray-50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <span className="text-xs font-bold text-gray-800 block">Sinkronisasi Mandiri Database</span>
+                  <p className="text-[11px] text-gray-400 max-w-xl leading-normal">
+                    Melakukan rekonstruksi tabel, kolom baru secara otomatis tanpa merusak data lama, serta melakukan seeding (pengisian data awal) jika tabel terdeteksi kosong.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleInitDb}
+                  disabled={initLoading}
+                  className="px-5 py-3 bg-primary hover:bg-primary/90 text-white font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 shrink-0"
+                >
+                  {initLoading ? (
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  ) : (
+                    <RefreshCcw className="w-4 h-4" />
+                  )}
+                  {initLoading ? 'Memproses Self-Healing...' : 'SINKRONISASI & PERBAIKI STRUKTUR DATABASE'}
+                </button>
+              </div>
+
+              {/* Init result alert */}
+              {initResult && (
+                <div className={`p-4 rounded-xl text-xs flex items-start gap-2 animate-fadeIn ${
+                  initResult.status === 'success' ? 'bg-emerald-50 border border-emerald-100 text-emerald-800' : 'bg-red-50 border border-red-100 text-red-800'
+                }`}>
+                  {initResult.status === 'success' ? (
+                    <CheckCircle className="w-4.5 h-4.5 text-emerald-600 shrink-0 mt-0.5" />
+                  ) : (
+                    <AlertCircle className="w-4.5 h-4.5 text-red-500 shrink-0 mt-0.5" />
+                  )}
+                  <div>
+                    <span className="font-extrabold block">
+                      {initResult.status === 'success' ? 'Proses Sinkronisasi Sukses!' : 'Gagal Melakukan Sinkronisasi'}
+                    </span>
+                    <p className="mt-0.5 leading-relaxed">{initResult.message}</p>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <div className="p-4 bg-gray-50 border border-gray-100 text-xs text-gray-500 rounded-xl text-center">
+              Klik "Segarkan Status" atau lakukan pemicuan diagnosa untuk melihat kesehatan koneksi database Anda.
+            </div>
+          )}
+        </div>
+        </>
       ) : (
         <div className="p-10 bg-white rounded-2xl border border-gray-100 shadow-sm text-center text-gray-400">
           <SlidersHorizontal className="w-12 h-12 text-gray-300 mx-auto mb-3" />

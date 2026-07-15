@@ -3,7 +3,7 @@ dotenv.config({ override: true });
 
 import express from 'express';
 import path from 'path';
-import { db, pool, initializeSchema, ensureSchemaInitialized } from './src/db/index';
+import { db, pool, initializeSchema, ensureSchemaInitialized, isInitialized, schemaInitError } from './src/db/index';
 import {
   users,
   customers,
@@ -151,6 +151,51 @@ app.use(async (req, res, next) => {
     } catch (error: any) {
       console.error('Manual DB Init Error:', error);
       res.status(500).json({ error: `Manual initialization failed: ${error.message || error}` });
+    }
+  });
+
+  // 1.6. Database Diagnostics endpoint for OWNER/ADMIN dashboard
+  app.get('/api/db-diagnostics', async (req, res) => {
+    try {
+      const dbType = process.env.DATABASE_URL ? 'Supabase (PostgreSQL)' : 'Cloud SQL (Google Cloud)';
+      const connectionStringInfo = process.env.DATABASE_URL 
+        ? process.env.DATABASE_URL.replace(/:([^:@]+)@/, ':***@') // redact database password
+        : 'Cloud SQL config';
+
+      // Check table counts
+      const getCount = async (tableName: string) => {
+        try {
+          const result = await pool.query(`SELECT COUNT(*) FROM ${tableName}`);
+          return parseInt(result.rows[0].count, 10);
+        } catch (e: any) {
+          return `Tabel tidak ditemukan / Error: ${e.message || e}`;
+        }
+      };
+
+      const tableCounts = {
+        users: await getCount('users'),
+        customers: await getCount('customers'),
+        gold_prices: await getCount('gold_prices'),
+        money_transactions: await getCount('money_transactions'),
+        gold_transactions: await getCount('gold_transactions'),
+        loans: await getCount('loans'),
+        loan_payments: await getCount('loan_payments'),
+        audit_logs: await getCount('audit_logs'),
+      };
+
+      res.json({
+        status: 'ok',
+        databaseType: dbType,
+        connectionString: connectionStringInfo,
+        tableCounts,
+        isInitialized,
+        schemaInitError: schemaInitError ? String(schemaInitError) : null,
+      });
+    } catch (err: any) {
+      res.status(500).json({
+        status: 'error',
+        message: err.message || String(err),
+      });
     }
   });
 
