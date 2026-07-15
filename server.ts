@@ -19,6 +19,38 @@ import { eq, desc } from 'drizzle-orm';
 const app = express();
 app.use(express.json());
 
+function validateConnectionString(url: string): { valid: boolean; error?: string; suggestion?: string } {
+  const placeholders = ['[password]', '<password>', '[your-password]', '[your_password]', 'your-password', 'your_password', 'yourpassword', 'password_kamu'];
+  for (const placeholder of placeholders) {
+    if (url.toLowerCase().includes(placeholder)) {
+      return {
+        valid: false,
+        error: 'DATABASE_URL masih menggunakan placeholder password.',
+        suggestion: `Silakan ganti kata "${placeholder}" di dalam DATABASE_URL dengan password asli database Supabase Anda.`
+      };
+    }
+  }
+
+  // Check if password has special characters and is not URL encoded
+  try {
+    const match = url.match(/postgres(?:ql)?:\/\/([^:]+):([^@]+)@/);
+    if (match) {
+      const password = match[2];
+      if (password.includes('@') || password.includes(':') || password.includes('/') || password.includes('?') || password.includes('#')) {
+        return {
+          valid: true,
+          error: 'Password database Anda mengandung karakter khusus yang belum di-URL-encode.',
+          suggestion: 'Jika password database Supabase Anda mengandung karakter khusus seperti @, :, /, ?, atau #, Anda harus melakukan URL-encode pada karakter tersebut (misalnya @ menjadi %40, # menjadi %23) atau membuat password baru di Supabase yang hanya terdiri dari huruf dan angka agar koneksi tidak error.'
+        };
+      }
+    }
+  } catch (e) {
+    // Ignore parsing error
+  }
+
+  return { valid: true };
+}
+
 // Database Configuration Guard Middleware
 app.use(async (req, res, next) => {
   // Allow health check, init-db and assets to pass without DB configuration
@@ -40,10 +72,46 @@ app.use(async (req, res, next) => {
     });
   }
 
+  if (hasDbUrl) {
+    const validation = validateConnectionString(process.env.DATABASE_URL!);
+    if (!validation.valid) {
+      return res.status(503).json({
+        error: validation.error,
+        message: 'Password di DATABASE_URL belum diatur dengan benar.',
+        suggestion: validation.suggestion,
+        missingConfig: true
+      });
+    }
+  }
+
   try {
     await ensureSchemaInitialized();
-  } catch (err) {
+  } catch (err: any) {
     console.error('[DB Guard] Failed during lazy schema initialization:', err);
+    const errMessage = err.message || String(err);
+    let friendlyMessage = 'Gagal melakukan koneksi & inisialisasi database (Supabase/PostgreSQL).';
+    let friendlySuggestion = 'Silakan periksa apakah database Anda di Supabase aktif (tidak sedang di-pause/suspended), dan pastikan Connection String & Password Anda benar.';
+
+    if (errMessage.includes('password authentication failed') || errMessage.includes('auth')) {
+      friendlyMessage = 'Otentikasi password database gagal (Password Supabase salah).';
+      friendlySuggestion = 'Password database Anda di dalam DATABASE_URL salah. Harap periksa kembali password database Supabase Anda dan pastikan tidak ada karakter khusus yang tidak di-URL-encode.';
+    } else if (errMessage.includes('ENOTFOUND') || errMessage.includes('getaddrinfo') || errMessage.includes('not found')) {
+      friendlyMessage = 'Host database tidak dapat ditemukan (Alamat salah).';
+      friendlySuggestion = 'Alamat host di dalam DATABASE_URL Anda salah atau tidak valid. Silakan periksa kembali apakah Anda menyalin Connection String dari Supabase dengan benar.';
+    } else if (errMessage.includes('ECONNREFUSED')) {
+      friendlyMessage = 'Koneksi ke database ditolak (Connection Refused).';
+      friendlySuggestion = 'Database menolak koneksi. Pastikan database Anda di Supabase sedang aktif (tidak sedang di-pause/suspended) dan port yang digunakan sudah benar.';
+    } else if (errMessage.includes('ETIMEDOUT') || errMessage.includes('timeout') || errMessage.includes('time out')) {
+      friendlyMessage = 'Koneksi ke database timeout (Waktu habis).';
+      friendlySuggestion = 'Waktu koneksi ke database habis. Ini terjadi karena host tidak bisa dijangkau atau salah. Pastikan proyek Supabase Anda aktif dan salin Connection String yang benar.';
+    }
+
+    return res.status(503).json({
+      error: friendlyMessage,
+      message: errMessage,
+      suggestion: friendlySuggestion,
+      missingConfig: true
+    });
   }
 
   next();
@@ -585,6 +653,17 @@ app.use(async (req, res, next) => {
       console.error('Error saving staff user:', error);
       res.status(500).json({ error: 'Failed to save staff user' });
     }
+  });
+
+  // Global Error Handler Middleware
+  app.use((err: any, req: any, res: any, next: any) => {
+    console.error('[Global Error Handler] Caught uncaught error:', err);
+    res.status(500).json({
+      error: 'Terjadi kesalahan internal pada server.',
+      message: err.message || String(err),
+      stack: process.env.NODE_ENV !== 'production' ? err.stack : undefined,
+      suggestion: 'Jika ini masalah koneksi database, silakan periksa status database Anda di Supabase atau periksa kembali format DATABASE_URL Anda.'
+    });
   });
 
   // Vite middleware for development or Static Asset serving for production

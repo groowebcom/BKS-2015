@@ -9,7 +9,7 @@ export const createPool = () => {
   if (connectionString && (connectionString.startsWith('postgres://') || connectionString.startsWith('postgresql://'))) {
     return new Pool({
       connectionString,
-      connectionTimeoutMillis: 15000,
+      connectionTimeoutMillis: 4000,
       ssl: { rejectUnauthorized: false }, // Necessary for production connections to Supabase
     });
   }
@@ -28,7 +28,7 @@ export const createPool = () => {
     user,
     password,
     database,
-    connectionTimeoutMillis: 15000,
+    connectionTimeoutMillis: 4000,
   });
 };
 
@@ -175,6 +175,7 @@ export const initializeSchema = async (pool: any) => {
     }
   } catch (err: any) {
     console.error('[Schema] Failed to run self-healing schema initialization:', err.message || err);
+    throw err;
   }
 };
 
@@ -187,6 +188,7 @@ pool.on('error', (err) => {
 // Run self-healing schema initialization on startup (skip in serverless to prevent connection leaks & timeouts, initialized lazily instead)
 let isInitialized = false;
 let initializingPromise: Promise<void> | null = null;
+export let schemaInitError: any = null;
 
 export const ensureSchemaInitialized = async () => {
   if (isInitialized) return;
@@ -196,9 +198,12 @@ export const ensureSchemaInitialized = async () => {
     try {
       await initializeSchema(pool);
       isInitialized = true;
-    } catch (err) {
+      schemaInitError = null;
+    } catch (err: any) {
       console.error('[Schema] Lazy schema initialization failed:', err);
+      schemaInitError = err;
       initializingPromise = null; // allow retry on next request
+      throw err;
     }
   })();
 
