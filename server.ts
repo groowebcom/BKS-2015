@@ -51,6 +51,25 @@ function validateConnectionString(url: string): { valid: boolean; error?: string
   return { valid: true };
 }
 
+function logAndFormatDbError(err: any, actionDescription: string) {
+  console.error(`[DB ERROR] Failed during: ${actionDescription}`, err);
+  if (err && typeof err === 'object') {
+    const cause = err.cause || err.originalError;
+    if (cause) {
+      console.error(`[DB ERROR DETAIL] Cause:`, {
+        message: cause.message,
+        detail: cause.detail,
+        hint: cause.hint,
+        code: cause.code,
+        constraint: cause.constraint,
+        table: cause.table,
+      });
+      return `${err.message || err} (${cause.detail || cause.message || ''})`;
+    }
+  }
+  return err?.message || String(err);
+}
+
 // Database Configuration Guard Middleware
 app.use(async (req, res, next) => {
   // Allow health check, init-db and assets to pass without DB configuration
@@ -327,8 +346,8 @@ app.use(async (req, res, next) => {
         .returning();
       res.json(inserted[0]);
     } catch (error) {
-      console.error('Error saving money transaction:', error);
-      res.status(500).json({ error: 'Failed to save money transaction' });
+      const detailedMessage = logAndFormatDbError(error, 'saving money transaction');
+      res.status(500).json({ error: `Failed to save money transaction: ${detailedMessage}` });
     }
   });
 
