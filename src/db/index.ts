@@ -152,7 +152,30 @@ export const initializeSchema = async (pool: any) => {
       );
     `);
 
-    console.log('[Schema] All tables verified and created successfully.');
+    // Resilient Self-Healing Column Updates for existing tables
+    await pool.query(`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS uid TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACTIVE';
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACTIVE';
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS is_first_login BOOLEAN NOT NULL DEFAULT TRUE;
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS notes TEXT;
+      ALTER TABLE customers ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();
+
+      ALTER TABLE gold_prices ADD COLUMN IF NOT EXISTS updated_by TEXT;
+
+      ALTER TABLE money_transactions ADD COLUMN IF NOT EXISTS is_reversaled BOOLEAN DEFAULT FALSE;
+      ALTER TABLE money_transactions ADD COLUMN IF NOT EXISTS reversal_of TEXT;
+
+      ALTER TABLE gold_transactions ADD COLUMN IF NOT EXISTS is_reversaled BOOLEAN DEFAULT FALSE;
+      ALTER TABLE gold_transactions ADD COLUMN IF NOT EXISTS reversal_of TEXT;
+
+      ALTER TABLE loans ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'ACTIVE';
+    `);
+
+    console.log('[Schema] All tables verified, created, and self-healed successfully.');
 
     // Seed default owner user if users table is empty
     const usersRes = await pool.query('SELECT COUNT(*) FROM users');

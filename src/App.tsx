@@ -60,23 +60,34 @@ export default function App() {
         const fetchJson = async (url: string) => {
           try {
             const r = await fetch(url);
+            const contentType = r.headers.get('content-type') || '';
+            
             if (!r.ok) {
               const text = await r.text();
               try {
-                const parsed = JSON.parse(text);
-                if (parsed && parsed.missingConfig) {
-                  setDbError({
-                    error: parsed.error,
-                    message: parsed.message,
-                    suggestion: parsed.suggestion
-                  });
+                if (contentType.includes('application/json')) {
+                  const parsed = JSON.parse(text);
+                  if (parsed && parsed.missingConfig) {
+                    setDbError({
+                      error: parsed.error,
+                      message: parsed.message,
+                      suggestion: parsed.suggestion
+                    });
+                  }
+                  return parsed;
                 }
-                return parsed;
               } catch (e) {
-                console.warn(`HTML error response received for ${url}:`, text.substring(0, 100));
-                return null;
+                // Ignore parsing error
               }
+              console.warn(`HTML error response received for ${url}:`, text.substring(0, 100));
+              return null;
             }
+            
+            if (!contentType.includes('application/json')) {
+              console.warn(`Received non-JSON response with status ${r.status} for ${url}: Content-Type is ${contentType}`);
+              return null;
+            }
+            
             return await r.json();
           } catch (e) {
             console.error(`Fetch error for ${url}:`, e);
@@ -183,7 +194,16 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newLog)
-      }).then(r => r.json());
+      }).then(async r => {
+        if (!r.ok) {
+          throw new Error(`HTTP error ${r.status}`);
+        }
+        const contentType = r.headers.get('content-type') || '';
+        if (!contentType.includes('application/json')) {
+          throw new Error('Response is not JSON');
+        }
+        return r.json();
+      });
 
       setAuditLogs(prev => [saved, ...prev]);
     } catch (err) {
