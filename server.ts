@@ -3,7 +3,7 @@ dotenv.config({ override: true });
 
 import express from 'express';
 import path from 'path';
-import { db, pool, initializeSchema, ensureSchemaInitialized } from './src/db/index.ts';
+import { db, pool, initializeSchema, ensureSchemaInitialized } from './src/db/index';
 import {
   users,
   customers,
@@ -13,7 +13,7 @@ import {
   loans,
   loanPayments,
   auditLogs,
-} from './src/db/schema.ts';
+} from './src/db/schema';
 import { eq, desc } from 'drizzle-orm';
 
 const app = express();
@@ -38,7 +38,7 @@ function validateConnectionString(url: string): { valid: boolean; error?: string
       const password = match[2];
       if (password.includes('@') || password.includes(':') || password.includes('/') || password.includes('?') || password.includes('#')) {
         return {
-          valid: true,
+          valid: false,
           error: 'Password database Anda mengandung karakter khusus yang belum di-URL-encode.',
           suggestion: 'Jika password database Supabase Anda mengandung karakter khusus seperti @, :, /, ?, atau #, Anda harus melakukan URL-encode pada karakter tersebut (misalnya @ menjadi %40, # menjadi %23) atau membuat password baru di Supabase yang hanya terdiri dari huruf dan angka agar koneksi tidak error.'
         };

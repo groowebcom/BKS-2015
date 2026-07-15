@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pkg from 'pg';
-import * as schema from './schema.ts';
+import * as schema from './schema';
 
 const { Pool } = pkg;
 
@@ -10,6 +10,7 @@ export const createPool = () => {
     return new Pool({
       connectionString,
       connectionTimeoutMillis: 4000,
+      query_timeout: 4000,
       ssl: { rejectUnauthorized: false }, // Necessary for production connections to Supabase
     });
   }
@@ -29,6 +30,7 @@ export const createPool = () => {
     password,
     database,
     connectionTimeoutMillis: 4000,
+    query_timeout: 4000,
   });
 };
 
