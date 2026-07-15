@@ -221,14 +221,25 @@ export const ensureSchemaInitialized = async () => {
 
   initializingPromise = (async () => {
     try {
-      await initializeSchema(pool);
+      console.log('[Schema] Verifying database schema state with a lightweight query...');
+      // A quick query to check if the 'users' table is already initialized and queryable.
+      // If it exists, we can skip the slow CREATE TABLE / ALTER TABLE DDL run!
+      await pool.query('SELECT id FROM users LIMIT 1');
+      console.log('[Schema] Database is already initialized. Skipping slow DDL queries.');
       isInitialized = true;
       schemaInitError = null;
-    } catch (err: any) {
-      console.error('[Schema] Lazy schema initialization failed:', err);
-      schemaInitError = err;
-      initializingPromise = null; // allow retry on next request
-      throw err;
+    } catch (fastCheckErr: any) {
+      console.log('[Schema] Lightweight check failed or table does not exist. Falling back to full schema initialization...', fastCheckErr.message || fastCheckErr);
+      try {
+        await initializeSchema(pool);
+        isInitialized = true;
+        schemaInitError = null;
+      } catch (err: any) {
+        console.error('[Schema] Lazy schema initialization failed:', err);
+        schemaInitError = err;
+        initializingPromise = null; // allow retry on next request
+        throw err;
+      }
     }
   })();
 
