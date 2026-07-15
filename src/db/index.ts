@@ -184,9 +184,29 @@ pool.on('error', (err) => {
   console.error('Unexpected error on idle SQL pool client:', err);
 });
 
-// Run self-healing schema initialization on startup (skip in serverless to prevent connection leaks & timeouts)
+// Run self-healing schema initialization on startup (skip in serverless to prevent connection leaks & timeouts, initialized lazily instead)
+let isInitialized = false;
+let initializingPromise: Promise<void> | null = null;
+
+export const ensureSchemaInitialized = async () => {
+  if (isInitialized) return;
+  if (initializingPromise) return initializingPromise;
+
+  initializingPromise = (async () => {
+    try {
+      await initializeSchema(pool);
+      isInitialized = true;
+    } catch (err) {
+      console.error('[Schema] Lazy schema initialization failed:', err);
+      initializingPromise = null; // allow retry on next request
+    }
+  })();
+
+  return initializingPromise;
+};
+
 if (process.env.VERCEL !== '1') {
-  initializeSchema(pool).catch((err) => {
+  ensureSchemaInitialized().catch((err) => {
     console.error('[Schema] Failed to execute background initialization:', err);
   });
 }

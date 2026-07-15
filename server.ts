@@ -3,7 +3,7 @@ dotenv.config({ override: true });
 
 import express from 'express';
 import path from 'path';
-import { db, pool, initializeSchema } from './src/db/index.ts';
+import { db, pool, initializeSchema, ensureSchemaInitialized } from './src/db/index.ts';
 import {
   users,
   customers,
@@ -20,7 +20,7 @@ const app = express();
 app.use(express.json());
 
 // Database Configuration Guard Middleware
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
   // Allow health check, init-db and assets to pass without DB configuration
   if (req.path === '/api/health' || req.path === '/api/init-db' || !req.path.startsWith('/api/')) {
     return next();
@@ -38,6 +38,12 @@ app.use((req, res, next) => {
       suggestion: 'Silakan buka dashboard Vercel / Cloud Run Anda, masuk ke Project Settings -> Environment Variables, lalu tambahkan DATABASE_URL dengan Connection String database PostgreSQL (dari Supabase) Anda.',
       missingConfig: true
     });
+  }
+
+  try {
+    await ensureSchemaInitialized();
+  } catch (err) {
+    console.error('[DB Guard] Failed during lazy schema initialization:', err);
   }
 
   next();
