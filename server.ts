@@ -237,27 +237,32 @@ app.use(async (req, res, next) => {
         return res.json(updated[0]);
       } else {
         // Insert
-        let targetId = data.id;
-        let targetMemberNumber = data.memberNumber;
+        // Efficient ID and Member Number generation using optimized database queries
+        const lastCustRes = await pool.query(`
+          SELECT MAX(CAST(SUBSTRING(id FROM 6) AS INTEGER)) as max_val 
+          FROM customers 
+          WHERE id LIKE 'CUST-%'
+        `);
+        const maxId = lastCustRes.rows[0].max_val || 0;
+        
+        const countRes = await pool.query(`SELECT COUNT(*) as count FROM customers`);
+        const totalCount = parseInt(countRes.rows[0].count, 10);
+        
+        const nextCount = Math.max(totalCount, maxId) + 1;
+        
+        let targetId = data.id || 'CUST-' + nextCount.toString().padStart(3, '0');
+        let targetMemberNumber = data.memberNumber || 'BKS-2026-' + nextCount.toString().padStart(3, '0');
 
-        const allCustomers = await db.select().from(customers);
-        const existingIds = new Set(allCustomers.map(c => c.id));
-        const existingMemberNumbers = new Set(allCustomers.map(c => c.memberNumber));
+        // Fast collision check
+        const checkRes = await pool.query(
+          `SELECT id FROM customers WHERE id = $1 OR member_number = $2`,
+          [targetId, targetMemberNumber]
+        );
 
-        if (existingIds.has(targetId) || existingMemberNumbers.has(targetMemberNumber)) {
-          const maxId = allCustomers.reduce((max, item) => {
-            const match = item.id.match(/^CUST-(\d+)$/);
-            return match ? Math.max(max, parseInt(match[1], 10)) : max;
-          }, 0);
-          const nextCount = Math.max(allCustomers.length, maxId) + 1;
-          targetId = 'CUST-' + nextCount.toString().padStart(3, '0');
-          targetMemberNumber = 'BKS-2026-' + nextCount.toString().padStart(3, '0');
-
-          while (existingIds.has(targetId) || existingMemberNumbers.has(targetMemberNumber)) {
-            const rand = Math.floor(Math.random() * 1000);
-            targetId = `CUST-${Date.now()}-${rand}`;
-            targetMemberNumber = `BKS-2026-${Date.now()}-${rand}`;
-          }
+        if (checkRes.rows.length > 0) {
+          const rand = Math.floor(Math.random() * 1000);
+          targetId = `CUST-${Date.now()}-${rand}`;
+          targetMemberNumber = `BKS-2026-${Date.now()}-${rand}`;
         }
 
         const inserted = await db.insert(customers)
@@ -302,21 +307,33 @@ app.use(async (req, res, next) => {
       }
 
       let targetId = data.id;
-      const allPrices = await db.select().from(goldPrices);
-      const existingIds = new Set(allPrices.map(p => p.id));
 
-      if (!targetId || existingIds.has(targetId)) {
-        const maxId = allPrices.reduce((max, item) => {
-          const match = item.id.match(/^GP-(\d+)$/);
-          return match ? Math.max(max, parseInt(match[1], 10)) : max;
-        }, 0);
-        const nextCount = Math.max(allPrices.length, maxId) + 1;
+      // Efficient ID generation using optimized database query
+      const gpRes = await pool.query(`
+        SELECT MAX(CAST(SUBSTRING(id FROM 4) AS INTEGER)) as max_val 
+        FROM gold_prices 
+        WHERE id LIKE 'GP-%'
+      `);
+      const maxId = gpRes.rows[0].max_val || 0;
+      
+      const countRes = await pool.query(`SELECT COUNT(*) as count FROM gold_prices`);
+      const totalCount = parseInt(countRes.rows[0].count, 10);
+      
+      const nextCount = Math.max(totalCount, maxId) + 1;
+
+      if (!targetId) {
         targetId = 'GP-' + nextCount.toString().padStart(3, '0');
+      }
 
-        while (existingIds.has(targetId)) {
-          const rand = Math.floor(Math.random() * 1000);
-          targetId = `GP-${Date.now()}-${rand}`;
-        }
+      // Fast collision check
+      const checkRes = await pool.query(
+        `SELECT id FROM gold_prices WHERE id = $1`,
+        [targetId]
+      );
+
+      if (checkRes.rows.length > 0) {
+        const rand = Math.floor(Math.random() * 1000);
+        targetId = `GP-${Date.now()}-${rand}`;
       }
 
       const inserted = await db.insert(goldPrices)
@@ -355,24 +372,34 @@ app.use(async (req, res, next) => {
       let targetId = data.id;
       let targetTxNumber = data.transactionNumber;
 
-      const allTxs = await db.select().from(moneyTransactions);
-      const existingIds = new Set(allTxs.map(t => t.id));
-      const existingTxNumbers = new Set(allTxs.map(t => t.transactionNumber));
+      // Efficient ID and Transaction Number generation using optimized database query
+      const mtRes = await pool.query(`
+        SELECT MAX(CAST(SUBSTRING(id FROM 4) AS INTEGER)) as max_val 
+        FROM money_transactions 
+        WHERE id LIKE 'MT-%'
+      `);
+      const maxId = mtRes.rows[0].max_val || 0;
+      
+      const countRes = await pool.query(`SELECT COUNT(*) as count FROM money_transactions`);
+      const totalCount = parseInt(countRes.rows[0].count, 10);
+      
+      const nextCount = Math.max(totalCount, maxId) + 1;
 
-      if (!targetId || existingIds.has(targetId) || !targetTxNumber || existingTxNumbers.has(targetTxNumber)) {
-        const maxId = allTxs.reduce((max, item) => {
-          const match = item.id.match(/^MT-(\d+)$/);
-          return match ? Math.max(max, parseInt(match[1], 10)) : max;
-        }, 0);
-        const nextCount = Math.max(allTxs.length, maxId) + 1;
+      if (!targetId || !targetTxNumber) {
         targetId = 'MT-' + nextCount.toString().padStart(3, '0');
         targetTxNumber = 'TXM-2026-' + nextCount.toString().padStart(4, '0');
+      }
 
-        while (existingIds.has(targetId) || existingTxNumbers.has(targetTxNumber)) {
-          const rand = Math.floor(Math.random() * 1000);
-          targetId = `MT-${Date.now()}-${rand}`;
-          targetTxNumber = `TXM-2026-${Date.now()}-${rand}`;
-        }
+      // Fast collision check
+      const checkRes = await pool.query(
+        `SELECT id FROM money_transactions WHERE id = $1 OR transaction_number = $2`,
+        [targetId, targetTxNumber]
+      );
+
+      if (checkRes.rows.length > 0) {
+        const rand = Math.floor(Math.random() * 1000);
+        targetId = `MT-${Date.now()}-${rand}`;
+        targetTxNumber = `TXM-2026-${Date.now()}-${rand}`;
       }
 
       const inserted = await db.insert(moneyTransactions)
@@ -435,24 +462,34 @@ app.use(async (req, res, next) => {
       let targetId = data.id;
       let targetTxNumber = data.transactionNumber;
 
-      const allTxs = await db.select().from(goldTransactions);
-      const existingIds = new Set(allTxs.map(t => t.id));
-      const existingTxNumbers = new Set(allTxs.map(t => t.transactionNumber));
+      // Efficient ID and Transaction Number generation using optimized database query
+      const gtRes = await pool.query(`
+        SELECT MAX(CAST(SUBSTRING(id FROM 4) AS INTEGER)) as max_val 
+        FROM gold_transactions 
+        WHERE id LIKE 'GT-%'
+      `);
+      const maxId = gtRes.rows[0].max_val || 0;
+      
+      const countRes = await pool.query(`SELECT COUNT(*) as count FROM gold_transactions`);
+      const totalCount = parseInt(countRes.rows[0].count, 10);
+      
+      const nextCount = Math.max(totalCount, maxId) + 1;
 
-      if (!targetId || existingIds.has(targetId) || !targetTxNumber || existingTxNumbers.has(targetTxNumber)) {
-        const maxId = allTxs.reduce((max, item) => {
-          const match = item.id.match(/^GT-(\d+)$/);
-          return match ? Math.max(max, parseInt(match[1], 10)) : max;
-        }, 0);
-        const nextCount = Math.max(allTxs.length, maxId) + 1;
+      if (!targetId || !targetTxNumber) {
         targetId = 'GT-' + nextCount.toString().padStart(3, '0');
         targetTxNumber = 'TXG-2026-' + nextCount.toString().padStart(4, '0');
+      }
 
-        while (existingIds.has(targetId) || existingTxNumbers.has(targetTxNumber)) {
-          const rand = Math.floor(Math.random() * 1000);
-          targetId = `GT-${Date.now()}-${rand}`;
-          targetTxNumber = `TXG-2026-${Date.now()}-${rand}`;
-        }
+      // Fast collision check
+      const checkRes = await pool.query(
+        `SELECT id FROM gold_transactions WHERE id = $1 OR transaction_number = $2`,
+        [targetId, targetTxNumber]
+      );
+
+      if (checkRes.rows.length > 0) {
+        const rand = Math.floor(Math.random() * 1000);
+        targetId = `GT-${Date.now()}-${rand}`;
+        targetTxNumber = `TXG-2026-${Date.now()}-${rand}`;
       }
 
       const inserted = await db.insert(goldTransactions)
@@ -649,21 +686,32 @@ app.use(async (req, res, next) => {
 
       let targetId = data.id;
 
-      const allLogs = await db.select().from(auditLogs);
-      const existingIds = new Set(allLogs.map(l => l.id));
+      // Efficient ID generation using optimized database query
+      const alRes = await pool.query(`
+        SELECT MAX(CAST(SUBSTRING(id FROM 4) AS INTEGER)) as max_val 
+        FROM audit_logs 
+        WHERE id LIKE 'AL-%'
+      `);
+      const maxId = alRes.rows[0].max_val || 0;
+      
+      const countRes = await pool.query(`SELECT COUNT(*) as count FROM audit_logs`);
+      const totalCount = parseInt(countRes.rows[0].count, 10);
+      
+      const nextCount = Math.max(totalCount, maxId) + 1;
 
-      if (!targetId || existingIds.has(targetId)) {
-        const maxId = allLogs.reduce((max, item) => {
-          const match = item.id.match(/^AL-(\d+)$/);
-          return match ? Math.max(max, parseInt(match[1], 10)) : max;
-        }, 0);
-        const nextCount = Math.max(allLogs.length, maxId) + 1;
+      if (!targetId) {
         targetId = 'AL-' + nextCount.toString().padStart(3, '0');
+      }
 
-        while (existingIds.has(targetId)) {
-          const rand = Math.floor(Math.random() * 1000);
-          targetId = `AL-${Date.now()}-${rand}`;
-        }
+      // Fast collision check
+      const checkRes = await pool.query(
+        `SELECT id FROM audit_logs WHERE id = $1`,
+        [targetId]
+      );
+
+      if (checkRes.rows.length > 0) {
+        const rand = Math.floor(Math.random() * 1000);
+        targetId = `AL-${Date.now()}-${rand}`;
       }
 
       const inserted = await db.insert(auditLogs)
