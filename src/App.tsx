@@ -31,9 +31,55 @@ import Reports from './components/Reports';
 import GoldPricePage from './components/GoldPricePage';
 import ImportPage from './components/ImportPage';
 import AuditTrailPage from './components/AuditTrailPage';
+import { CheckCircle, AlertCircle } from 'lucide-react';
 
 export default function App() {
   
+  // Custom interactive notification state
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    const currentMsg = message;
+    setTimeout(() => {
+      setToast(prev => prev && prev.message === currentMsg ? null : prev);
+    }, 6000);
+  };
+
+  const safeFetch = async (url: string, options?: RequestInit) => {
+    try {
+      const res = await fetch(url, options);
+      const contentType = res.headers.get('content-type') || '';
+      
+      if (!res.ok) {
+        let errMessage = `HTTP ${res.status}`;
+        if (contentType.includes('application/json')) {
+          const parsed = await res.json().catch(() => ({}));
+          errMessage = parsed.error || parsed.message || errMessage;
+        } else {
+          const text = await res.text().catch(() => '');
+          if (text) errMessage = text.substring(0, 100);
+        }
+        throw new Error(errMessage);
+      }
+      
+      if (!contentType.includes('application/json')) {
+        throw new Error('Respon dari server bukan berformat JSON.');
+      }
+      
+      const data = await res.json();
+      if (data && data.error) {
+        throw new Error(data.error);
+      }
+      
+      return data;
+    } catch (err: any) {
+      console.error(`[safeFetch Error] url=${url}:`, err);
+      showToast('error', err.message || 'Koneksi ke database gagal atau terputus.');
+      throw err;
+    }
+  };
+
   // App Session state
   const [currentUser, setCurrentUser] = useState<User | Customer | null>(null);
   const [currentRole, setCurrentRole] = useState<UserRole | null>(null);
@@ -262,14 +308,15 @@ export default function App() {
     const updatedCust = { ...currentUser, passwordHash: newPass, isFirstLogin: false } as Customer;
 
     try {
-      const saved = await fetch('/api/customers', {
+      const saved = await safeFetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedCust)
-      }).then(r => r.json());
+      });
 
       setCustomers(prev => prev.map(c => c.id === currentUser.id ? saved : c));
       setCurrentUser(saved);
+      showToast('success', 'Password berhasil diperbarui.');
       logSystemActivity('UPDATE_PASSWORD', `Nasabah ${currentUser.name} mengubah password login mandiri (Enforce BR-204)`);
     } catch (err) {
       console.error('Error updating password:', err);
@@ -293,13 +340,14 @@ export default function App() {
     };
 
     try {
-      const saved = await fetch('/api/customers', {
+      const saved = await safeFetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalCustomer)
-      }).then(r => r.json());
+      });
 
       setCustomers(prev => [...prev, saved]);
+      showToast('success', `Nasabah baru ${saved.name} berhasil didaftarkan.`);
       logSystemActivity('CREATE_CUSTOMER_PROFILE', `Membuat profil nasabah baru: ${saved.name} dengan ID ${memberNum}`);
     } catch (err) {
       console.error('Error creating customer:', err);
@@ -308,11 +356,11 @@ export default function App() {
 
   const handleUpdateCustomer = async (updatedCust: Customer) => {
     try {
-      const saved = await fetch('/api/customers', {
+      const saved = await safeFetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedCust)
-      }).then(r => r.json());
+      });
 
       setCustomers(prev => prev.map(c => c.id === saved.id ? saved : c));
       
@@ -320,6 +368,7 @@ export default function App() {
         setViewingCustomer(saved);
       }
 
+      showToast('success', `Profil nasabah ${saved.name} berhasil diperbarui.`);
       logSystemActivity('UPDATE_CUSTOMER_PROFILE', `Memperbarui profil keanggotaan nasabah: ${saved.name} (${saved.memberNumber})`);
     } catch (err) {
       console.error('Error updating customer:', err);
@@ -333,15 +382,16 @@ export default function App() {
     const updatedCust = { ...targetCust, status: newStatus };
 
     try {
-      const saved = await fetch('/api/customers', {
+      const saved = await safeFetch('/api/customers', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedCust)
-      }).then(r => r.json());
+      });
 
       setCustomers(prev => prev.map(c => c.id === id ? saved : c));
       
       const actionLabel = newStatus === 'ACTIVE' ? 'Aktivasi' : 'Suspensasi/Penonaktifan';
+      showToast('success', `Status keanggotaan nasabah ${saved.name} berhasil diubah menjadi ${newStatus}.`);
       logSystemActivity('SUSPEND_CUSTOMER_TOGGLE', `${actionLabel} keanggotaan nasabah ${saved.name} (${saved.memberNumber})`);
     } catch (err) {
       console.error('Error toggling customer status:', err);
@@ -367,13 +417,14 @@ export default function App() {
     };
 
     try {
-      const saved = await fetch('/api/money-transactions', {
+      const saved = await safeFetch('/api/money-transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTx)
-      }).then(r => r.json());
+      });
 
       setMoneyTransactions(prev => [...prev, saved]);
+      showToast('success', `Transaksi ${type === 'DEPOSIT' ? 'Setoran' : 'Penarikan'} Uang sebesar Rp ${amount.toLocaleString('id-ID')} berhasil disimpan.`);
       logSystemActivity('MONEY_TRANSACTION', `Input Jurnal ${type} nominal ${amount.toLocaleString('id-ID')} untuk ${viewingCustomer.name} (${txNumber})`);
     } catch (err) {
       console.error('Error executing money transaction:', err);
@@ -402,13 +453,15 @@ export default function App() {
     };
 
     try {
-      const saved = await fetch('/api/gold-transactions', {
+      const saved = await safeFetch('/api/gold-transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTx)
-      }).then(r => r.json());
+      });
 
       setGoldTransactions(prev => [...prev, saved]);
+      let toastMsg = `Transaksi ${type === 'GOLD_DEPOSIT' ? 'Setoran' : type === 'GOLD_WITHDRAWAL' ? 'Penarikan' : 'Penjualan'} Emas seberat ${weight.toFixed(4)} gram berhasil disimpan.`;
+      showToast('success', toastMsg);
       logSystemActivity('GOLD_TRANSACTION', `Input Jurnal ${type} seberat ${weight.toFixed(4)} gram (Snapshot Rp ${currentGoldPrice.toLocaleString('id-ID')}/g) untuk ${viewingCustomer.name} (${txNumber})`);
 
       // BR-406: If selling gold, system automatically triggers a savings cash deposit (GOLD_SALE_PROCEEDS)
@@ -427,11 +480,11 @@ export default function App() {
           createdBy: currentUserName,
         };
 
-        const savedMoney = await fetch('/api/money-transactions', {
+        const savedMoney = await safeFetch('/api/money-transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMoneyTx)
-        }).then(r => r.json());
+        });
 
         setMoneyTransactions(prev => [...prev, savedMoney]);
         logSystemActivity('GOLD_SELL_CASH_DISBURSEMENT', `Sistem otomatis mengkreditkan Kas Tabungan Uang sebesar ${amountRupiah.toLocaleString('id-ID')} hasil pencairan penjualan emas (${mTxNumber})`);
@@ -477,21 +530,22 @@ export default function App() {
 
     try {
       const [savedLoan, savedMoney] = await Promise.all([
-        fetch('/api/loans', {
+        safeFetch('/api/loans', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newLoan)
-         }).then(r => r.json()),
-        fetch('/api/money-transactions', {
+         }),
+        safeFetch('/api/money-transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMoneyTx)
-         }).then(r => r.json())
+         })
       ]);
 
       setLoans(prev => [...prev, savedLoan]);
       setMoneyTransactions(prev => [...prev, savedMoney]);
 
+      showToast('success', `Kontrak pinjaman ${loanNum} berhasil diaktifkan & modal tunai Rp ${amount.toLocaleString('id-ID')} dicairkan ke kas.`);
       logSystemActivity('LOAN_CONTRACT_DISBURSEMENT', `Pencairan kontrak pinjaman baru ${loanNum} nominal ${amount.toLocaleString('id-ID')} disalurkan langsung ke kas nasabah.`);
     } catch (err) {
       console.error('Error executing loan disbursement:', err);
@@ -538,30 +592,31 @@ export default function App() {
 
     try {
       const [savedPayment, savedMoney, savedLoan] = await Promise.all([
-        fetch('/api/loan-payments', {
+        safeFetch('/api/loan-payments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newPayment)
-        }).then(r => r.json()),
-        fetch('/api/money-transactions', {
+        }),
+        safeFetch('/api/money-transactions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(newMoneyTx)
-        }).then(r => r.json()),
-        fetch(`/api/loans/${loanId}`, {
+        }),
+        safeFetch(`/api/loans/${loanId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             outstanding: Math.max(0, updatedOutstanding),
             status: isPaid ? 'PAID' : 'ACTIVE'
           })
-        }).then(r => r.json())
+        })
       ]);
 
       setLoans(prev => prev.map(l => l.id === loanId ? savedLoan : l));
       setLoanPayments(prev => [...prev, savedPayment]);
       setMoneyTransactions(prev => [...prev, savedMoney]);
 
+      showToast('success', `Pembayaran angsuran Rp ${amount.toLocaleString('id-ID')} berhasil dicatatkan.`);
       logSystemActivity('LOAN_CONTRACT_PAYMENT', `Cicilan pembayaran diterima untuk kontrak ${targetLoan.loanNumber} sebesar ${amount.toLocaleString('id-ID')}. Sisa outstanding: ${updatedOutstanding.toLocaleString('id-ID')}`);
     } catch (err) {
       console.error('Error executing loan payment:', err);
@@ -594,19 +649,20 @@ export default function App() {
 
       try {
         const [updatedOriginal, savedReversal] = await Promise.all([
-          fetch(`/api/money-transactions/${txId}`, {
+          safeFetch(`/api/money-transactions/${txId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isReversaled: true, reversalOf: original.id })
-          }).then(r => r.json()),
-          fetch('/api/money-transactions', {
+          }),
+          safeFetch('/api/money-transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reversalTx)
-          }).then(r => r.json())
+          })
         ]);
 
         setMoneyTransactions(prev => prev.map(t => t.id === txId ? updatedOriginal : t).concat(savedReversal));
+        showToast('success', `Reversal transaksi ${original.transactionNumber} berhasil dieksekusi.`);
         logSystemActivity('REVERSAL_MONEY_TX', `Koreksi jurnal reversal uang tunai (Ref: ${original.transactionNumber}) alasan: ${reason}`);
       } catch (err) {
         console.error('Error executing money reversal:', err);
@@ -637,19 +693,20 @@ export default function App() {
 
       try {
         const [updatedOriginal, savedReversal] = await Promise.all([
-          fetch(`/api/gold-transactions/${txId}`, {
+          safeFetch(`/api/gold-transactions/${txId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ isReversaled: true, reversalOf: original.id })
-          }).then(r => r.json()),
-          fetch('/api/gold-transactions', {
+          }),
+          safeFetch('/api/gold-transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(reversalTx)
-          }).then(r => r.json())
+          })
         ]);
 
         setGoldTransactions(prev => prev.map(t => t.id === txId ? updatedOriginal : t).concat(savedReversal));
+        showToast('success', `Reversal transaksi ${original.transactionNumber} berhasil dieksekusi.`);
         logSystemActivity('REVERSAL_GOLD_TX', `Koreksi jurnal reversal tabungan emas (Ref: ${original.transactionNumber}) alasan: ${reason}`);
       } catch (err) {
         console.error('Error executing gold reversal:', err);
@@ -675,23 +732,14 @@ export default function App() {
     };
 
     try {
-      const res = await fetch('/api/gold-prices', {
+      const saved = await safeFetch('/api/gold-prices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newPriceRecord)
       });
-      
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `HTTP error ${res.status}`);
-      }
-
-      const saved = await res.json();
-      if (saved.error) {
-        throw new Error(saved.error);
-      }
 
       setGoldPrices(prev => [...prev, saved]);
+      showToast('success', `Harga acuan logam mulia emas berhasil diperbarui menjadi Rp ${price.toLocaleString('id-ID')} / gram.`);
       logSystemActivity('GOLD_PRICE_UPDATE', `Owner mengubah harga acuan emas aktif menjadi Rp ${price.toLocaleString('id-ID')} / gram`);
     } catch (err) {
       console.error('Error updating gold price:', err);
@@ -704,14 +752,15 @@ export default function App() {
     try {
       const savedList = await Promise.all(
         newCustList.map(cust =>
-          fetch('/api/customers', {
+          safeFetch('/api/customers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(cust)
-          }).then(r => r.json())
+          })
         )
       );
       setCustomers(prev => [...prev, ...savedList]);
+      showToast('success', `Import berkas Excel sukses: ${newCustList.length} profil nasabah berhasil diserap.`);
       logSystemActivity('IMPORT_EXCEL_CUSTOMERS', `Batch migrasi data profil master nasabah selesai: ${newCustList.length} akun berhasil diserap.`);
     } catch (err) {
       console.error('Error importing customers:', err);
@@ -722,14 +771,15 @@ export default function App() {
     try {
       const savedList = await Promise.all(
         newMoneyList.map(tx =>
-          fetch('/api/money-transactions', {
+          safeFetch('/api/money-transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tx)
-          }).then(r => r.json())
+          })
         )
       );
       setMoneyTransactions(prev => [...prev, ...savedList]);
+      showToast('success', `Import berkas Excel sukses: ${newMoneyList.length} baris jurnal uang tunai berhasil diserap.`);
       logSystemActivity('IMPORT_EXCEL_MONEY_TX', `Batch migrasi data jurnal tabungan uang selesai: ${newMoneyList.length} row berhasil diserap.`);
     } catch (err) {
       console.error('Error importing money transactions:', err);
@@ -740,14 +790,15 @@ export default function App() {
     try {
       const savedList = await Promise.all(
         newGoldList.map(tx =>
-          fetch('/api/gold-transactions', {
+          safeFetch('/api/gold-transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(tx)
-          }).then(r => r.json())
+          })
         )
       );
       setGoldTransactions(prev => [...prev, ...savedList]);
+      showToast('success', `Import berkas Excel sukses: ${newGoldList.length} baris jurnal tabungan emas berhasil diserap.`);
       logSystemActivity('IMPORT_EXCEL_GOLD_TX', `Batch migrasi data jurnal tabungan emas selesai: ${newGoldList.length} row berhasil diserap.`);
     } catch (err) {
       console.error('Error importing gold transactions:', err);
@@ -759,40 +810,65 @@ export default function App() {
   };
 
   // RENDER SELECTION ROUTER
-  if (!currentUser) {
-    return <Login onLoginSuccess={handleLoginSuccess} customers={customers} />;
-  }
-
-  // NASABAH RENDERING DIRECT (MOBILE CONTAINER)
-  if (currentRole === UserRole.CUSTOMER) {
-    return (
-      <DashboardNasabah 
-        customer={currentUser as Customer}
-        moneyTransactions={moneyTransactions}
-        goldTransactions={goldTransactions}
-        loans={loans}
-        loanPayments={loanPayments}
-        currentGoldPrice={currentGoldPrice}
-        onLogout={handleLogout}
-        onUpdatePassword={handleUpdatePassword}
-      />
-    );
-  }
-
-  // STAFF RENDERING (OWNER / ADMIN IN DESKTOP SHELL WITH SIDEBAR AND TABS)
   return (
-    <Layout
-      activeTab={activeTab}
-      setActiveTab={(tab) => {
-        setActiveTab(tab);
-        setViewingCustomer(null); // Clear active customer focus if swapping layouts
-      }}
-      userRole={currentRole as UserRole}
-      userName={currentUserName}
-      currentGoldPrice={currentGoldPrice}
-      onLogout={handleLogout}
-      dbError={dbError}
-    >
+    <>
+      {/* GLOBAL FLOATING TOAST NOTIFICATION */}
+      {toast && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[10000] w-full max-w-md px-4 animate-fadeIn">
+          <div className={`p-4 rounded-xl shadow-2xl border flex items-start gap-3 transition-all duration-300 ${
+            toast.type === 'success' 
+              ? 'bg-emerald-600 border-emerald-500 text-white shadow-emerald-950/40' 
+              : 'bg-rose-600 border-rose-500 text-white shadow-rose-950/40'
+          }`}>
+            {toast.type === 'success' ? (
+              <CheckCircle className="w-5 h-5 text-emerald-100 shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-5 h-5 text-rose-100 shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1">
+              <span className="font-extrabold text-xs block tracking-wide">
+                {toast.type === 'success' ? 'Berhasil!' : 'Terjadi Kesalahan!'}
+              </span>
+              <p className="mt-0.5 text-[11px] text-white/90 font-semibold leading-relaxed">
+                {toast.message}
+              </p>
+            </div>
+            <button 
+              onClick={() => setToast(null)}
+              className="text-white hover:text-gray-200 bg-white/10 hover:bg-white/20 w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] transition-all"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
+
+      {!currentUser ? (
+        <Login onLoginSuccess={handleLoginSuccess} customers={customers} />
+      ) : currentRole === UserRole.CUSTOMER ? (
+        <DashboardNasabah 
+          customer={currentUser as Customer}
+          moneyTransactions={moneyTransactions}
+          goldTransactions={goldTransactions}
+          loans={loans}
+          loanPayments={loanPayments}
+          currentGoldPrice={currentGoldPrice}
+          onLogout={handleLogout}
+          onUpdatePassword={handleUpdatePassword}
+        />
+      ) : (
+        <Layout
+          activeTab={activeTab}
+          setActiveTab={(tab) => {
+            setActiveTab(tab);
+            setViewingCustomer(null); // Clear active customer focus if swapping layouts
+          }}
+          userRole={currentRole as UserRole}
+          userName={currentUserName}
+          currentGoldPrice={currentGoldPrice}
+          onLogout={handleLogout}
+          dbError={dbError}
+        >
       
       {/* If viewing a customer details, override activeTab rendering */}
       {viewingCustomer ? (
@@ -1034,6 +1110,8 @@ export default function App() {
         </>
       )}
 
-    </Layout>
+        </Layout>
+      )}
+    </>
   );
 }
