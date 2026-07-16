@@ -61,11 +61,17 @@ export default function ImportPage({
     try {
       const res = await fetch('/api/init-db');
       const data = await res.json();
-      setInitResult({
+      const resultObj = {
         status: res.ok ? 'success' : 'error',
         message: data.message || data.error || 'Terjadi kesalahan saat menginisialisasi database.',
-      });
+      };
+      setInitResult(resultObj);
       await fetchDbDiagnostics();
+
+      // Auto dismiss after 10 seconds
+      setTimeout(() => {
+        setInitResult(prev => prev && prev.message === resultObj.message ? null : prev);
+      }, 10000);
     } catch (e: any) {
       setInitResult({
         status: 'error',
@@ -247,7 +253,39 @@ export default function ImportPage({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+
+      {/* FLOATING TOAST NOTIFICATION FOR DATABASE SYNC */}
+      {initResult && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-lg px-4">
+          <div className={`p-4 rounded-2xl shadow-2xl border flex items-start gap-3 transition-all duration-300 ${
+            initResult.status === 'success' 
+              ? 'bg-emerald-600 border-emerald-500 text-white shadow-emerald-900/30' 
+              : 'bg-rose-600 border-rose-500 text-white shadow-rose-900/30'
+          }`}>
+            {initResult.status === 'success' ? (
+              <CheckCircle className="w-6 h-6 text-emerald-100 shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="w-6 h-6 text-rose-100 shrink-0 mt-0.5" />
+            )}
+            <div className="flex-1">
+              <span className="font-extrabold text-sm block tracking-wide">
+                {initResult.status === 'success' ? '🎉 Proses Sinkronisasi Sukses!' : '❌ Gagal Melakukan Sinkronisasi'}
+              </span>
+              <p className="mt-1 text-xs text-emerald-50/90 font-medium leading-relaxed">
+                {initResult.message}
+              </p>
+            </div>
+            <button 
+              type="button"
+              onClick={() => setInitResult(null)}
+              className="text-white hover:text-gray-200 bg-white/10 hover:bg-white/20 w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs transition-all"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
       
       {/* Page Header */}
       <div>
