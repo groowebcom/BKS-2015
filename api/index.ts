@@ -1,6 +1,7 @@
+import app from '../server';
+
 export default async function handler(req: any, res: any) {
   try {
-    const { default: app } = await import('../server.ts');
     return app(req, res);
   } catch (err: any) {
     console.error('[Vercel Runtime Handler Error]:', err);
@@ -12,4 +13,5 @@ export default async function handler(req: any, res: any) {
     });
   }
 }
+
 
