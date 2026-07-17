@@ -19,9 +19,12 @@ export const createPool = () => {
   if (connectionString && (connectionString.startsWith('postgres://') || connectionString.startsWith('postgresql://'))) {
     return new Pool({
       connectionString,
-      connectionTimeoutMillis: 4000,
-      query_timeout: 4000,
+      connectionTimeoutMillis: 2500,
+      query_timeout: 2500,
       ssl: { rejectUnauthorized: false }, // Necessary for production connections to Supabase
+      allowExitOnIdle: true,
+      max: 4,
+      idleTimeoutMillis: 1000,
     });
   }
 
@@ -41,6 +44,9 @@ export const createPool = () => {
     database,
     connectionTimeoutMillis: 4000,
     query_timeout: 4000,
+    allowExitOnIdle: true,
+    max: 4,
+    idleTimeoutMillis: 1000,
   });
 };
 

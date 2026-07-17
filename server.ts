@@ -73,7 +73,7 @@ function logAndFormatDbError(err: any, actionDescription: string) {
 // Database Configuration Guard Middleware
 app.use(async (req, res, next) => {
   // Allow health check, init-db and assets to pass without DB configuration
-  if (req.path === '/api/health' || req.path === '/api/init-db' || !req.path.startsWith('/api/')) {
+  if (req.path === '/api/health' || req.path === '/api/init-db' || req.path === '/api/db-diagnostics' || !req.path.startsWith('/api/')) {
     return next();
   }
 
