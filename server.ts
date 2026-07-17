@@ -162,7 +162,21 @@ app.use(async (req, res, next) => {
         ? process.env.DATABASE_URL.replace(/:([^:@]+)@/, ':***@') // redact database password
         : 'Cloud SQL config';
 
-      // Check table counts
+      // 1. First test connectivity fast
+      try {
+        await pool.query('SELECT 1');
+      } catch (pingErr: any) {
+        return res.status(503).json({
+          status: 'error',
+          error: 'Database tidak dapat dijangkau (Connection Failed)',
+          message: pingErr.message || String(pingErr),
+          databaseType: dbType,
+          connectionString: connectionStringInfo,
+          suggestion: 'Harap periksa DATABASE_URL di Environment Variables Vercel Anda, dan pastikan proyek database Supabase Anda aktif dan tidak di-suspend atau di-pause.'
+        });
+      }
+
+      // Check table counts helper
       const getCount = async (tableName: string) => {
         try {
           const result = await pool.query(`SELECT COUNT(*) FROM ${tableName}`);
@@ -172,16 +186,16 @@ app.use(async (req, res, next) => {
         }
       };
 
-      const tableCounts = {
-        users: await getCount('users'),
-        customers: await getCount('customers'),
-        gold_prices: await getCount('gold_prices'),
-        money_transactions: await getCount('money_transactions'),
-        gold_transactions: await getCount('gold_transactions'),
-        loans: await getCount('loans'),
-        loan_payments: await getCount('loan_payments'),
-        audit_logs: await getCount('audit_logs'),
-      };
+      // 2. Fetch all counts in parallel so it doesn't take multiple timeouts sequentially
+      const tables = ['users', 'customers', 'gold_prices', 'money_transactions', 'gold_transactions', 'loans', 'loan_payments', 'audit_logs'];
+      const counts = await Promise.all(tables.map(async (t) => {
+        return { name: t, count: await getCount(t) };
+      }));
+
+      const tableCounts: Record<string, any> = {};
+      for (const item of counts) {
+        tableCounts[item.name] = item.count;
+      }
 
       res.json({
         status: 'ok',

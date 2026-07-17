@@ -329,13 +329,23 @@ export const ensureSchemaInitialized = async () => {
   initializingPromise = (async () => {
     try {
       console.log('[Schema] Verifying database schema state with lightweight queries...');
-      // Verify that all core tables exist and are queryable.
-      // If any of them fail (e.g. table doesn't exist), we fall back to full schema initialization.
-      await pool.query('SELECT id FROM users LIMIT 1');
-      await pool.query('SELECT id FROM customers LIMIT 1');
-      await pool.query('SELECT id FROM money_transactions LIMIT 1');
-      await pool.query('SELECT id FROM gold_transactions LIMIT 1');
-      await pool.query('SELECT id FROM loans LIMIT 1');
+      
+      // 1. Quick ping to test connectivity and timeout fast if unreachable
+      try {
+        await pool.query('SELECT 1');
+      } catch (pingErr: any) {
+        console.error('[Schema] Database ping failed. Database is likely offline or unreachable:', pingErr.message || pingErr);
+        throw new Error(`Database unreachable: ${pingErr.message || pingErr}`);
+      }
+
+      // 2. Verify tables in parallel so we don't block sequentially
+      await Promise.all([
+        pool.query('SELECT id FROM users LIMIT 1'),
+        pool.query('SELECT id FROM customers LIMIT 1'),
+        pool.query('SELECT id FROM money_transactions LIMIT 1'),
+        pool.query('SELECT id FROM gold_transactions LIMIT 1'),
+        pool.query('SELECT id FROM loans LIMIT 1')
+      ]);
       
       console.log('[Schema] Database schema is fully verified and initialized. Checking for empty tables to seed...');
       await ensureSeeded(pool);
@@ -343,6 +353,10 @@ export const ensureSchemaInitialized = async () => {
       isInitialized = true;
       schemaInitError = null;
     } catch (fastCheckErr: any) {
+      if (fastCheckErr.message?.includes('Database unreachable')) {
+        initializingPromise = null; // allow retry
+        throw fastCheckErr;
+      }
       console.log('[Schema] Lightweight check failed or tables do not exist. Falling back to full schema initialization...', fastCheckErr.message || fastCheckErr);
       try {
         await initializeSchema(pool);
