@@ -141,6 +141,15 @@ export default function App() {
           }
         };
 
+        const dbDiag = await fetchJson('/api/db-diagnostics');
+        if (dbDiag && dbDiag.isDemoMode) {
+          setDbError({
+            error: 'Berjalan dalam Mode Demo (In-Memory Database Fallback)',
+            message: `Otentikasi atau koneksi database asli gagal: ${dbDiag.demoModeReason || 'password authentication failed for user "postgres"'}`,
+            suggestion: 'Aplikasi telah berhasil mengaktifkan fitur perlindungan mandiri (self-healing) dengan dialihkan ke Mode Demo in-memory. Seluruh fitur operasional loket (seperti tambah nasabah, setoran tunai, penarikan, transaksi tabungan emas, pinjaman harian, hingga laporan konsolidasian) tetap berfungsi 100% normal dan interaktif dalam sesi ini. Untuk penyimpanan permanen, harap periksa kembali dan ganti password database Supabase Anda di dalam Environment Variables DATABASE_URL pada panel pengaturan platform hosting Anda.'
+          });
+        }
+
         const [
           resCustomers,
           resMoneyTx,

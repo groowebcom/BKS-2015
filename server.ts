@@ -3,7 +3,7 @@ dotenv.config({ override: true });
 
 import express from 'express';
 import path from 'path';
-import { db, pool, initializeSchema, ensureSchemaInitialized, isInitialized, schemaInitError } from './src/db/index';
+import { db, pool, initializeSchema, ensureSchemaInitialized, isInitialized, schemaInitError, isDemoMode, demoModeReason } from './src/db/index';
 import {
   users,
   customers,
@@ -204,6 +204,8 @@ app.use(async (req, res, next) => {
         tableCounts,
         isInitialized,
         schemaInitError: schemaInitError ? String(schemaInitError) : null,
+        isDemoMode,
+        demoModeReason,
       });
     } catch (err: any) {
       res.status(500).json({
